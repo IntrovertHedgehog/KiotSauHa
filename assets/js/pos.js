@@ -32,7 +32,8 @@ let dotInterval = setInterval(function () { $(".dot").text('.') }, 3000);
 let Store = require('electron-store');
 const remote = require('@electron/remote');
 const app = remote.app;
-let img_path = app.getPath('appData') + '/POS/uploads/';
+// let img_path = app.getPath('appData') + '/POS/uploads/';
+let img_path = process.env.APPDATA + '/POS/uploads/';
 let api = 'http://' + host + ':' + port + '/api/';
 let btoa = require('btoa');
 let jsPDF = require('jspdf');
@@ -1713,7 +1714,7 @@ if (auth == undefined) {
                 }
             }
             else {
-                if (formData.password != atob(allUsers[user_index].password)) {
+                if (allUsers[user_index] && (formData.password != atob(allUsers[user_index].password))) {
                     if (formData.password != formData.pass) {
                         Swal.fire(
                             'Oops!',
@@ -1726,7 +1727,7 @@ if (auth == undefined) {
 
 
 
-            if (formData.password == atob(user.password) || formData.password == atob(allUsers[user_index].password) || formData.password == formData.pass) {
+            if (formData.password == atob(user.password) || (allUsers[user_index] && formData.password == atob(allUsers[user_index].password)) || formData.password == formData.pass) {
                 $.ajax({
                     url: api + 'users/post',
                     type: 'POST',
