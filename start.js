@@ -7,6 +7,9 @@ const server = require('./server');
 const {app, BrowserWindow, ipcMain, screen} = require('electron');
 const path = require('path')
 
+const remote_main = require("@electron/remote/main")
+remote_main.initialize()
+
 const contextMenu = require('electron-context-menu');
 
 let mainWindow
@@ -38,6 +41,8 @@ function createWindow() {
   mainWindow.on('closed', () => {
     mainWindow = null
   })
+
+  remote_main.enable(mainWindow.webContents)
 }
 
 

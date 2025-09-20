@@ -1,0 +1,18 @@
+diff --git a/node_modules/electron-store/index.js b/node_modules/electron-store/index.js
+index ae9dcd8..23312db 100644
+--- a/node_modules/electron-store/index.js
++++ b/node_modules/electron-store/index.js
+@@ -1,11 +1,12 @@
+ 'use strict';
+ const path = require('path');
+ const electron = require('electron');
++const remote = require("@electron/remote")
+ const Conf = require('conf');
+ 
+ class ElectronStore extends Conf {
+ 	constructor(options) {
+-		const defaultCwd = (electron.app || electron.remote.app).getPath('userData');
++		const defaultCwd = (electron.app || remote.app).getPath('userData');
+ 
+ 		options = {
+ 			name: 'config',
