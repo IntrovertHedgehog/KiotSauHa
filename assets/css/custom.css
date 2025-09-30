@@ -1,0 +1,7 @@
+.modal-super {
+  width: 1000px;
+}
+
+#productList td:nth-child(1), #productList th:nth-child(1) {
+  display: none;
+}
