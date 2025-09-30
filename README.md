@@ -1,5 +1,5 @@
 # Store Point of Sale
- Desktop Point of Sale app built with electron
+Desktop Point of Sale app built with electron
  
 **Features:**
 
@@ -15,14 +15,14 @@
 - Filter Transactions by Till, Cashier or Status. 
 - Filter Transactions by Date Range. 
 
- **To use on Windows:**
- [Download](http://www.storepointofsale.com/download/v1/StorePOS.msi) the MSI Installer
+**To use on Windows:**
+[Download](http://www.storepointofsale.com/download/v1/StorePOS.msi) the MSI Installer
 
 The default username and password is  **admin**
 
-  **Looking for a Desktop Invoicing app?**
+**Looking for a Desktop Invoicing app?**
   
- Check out the [Offline Invoicing](https://github.com/tngoman/Offline_Invoicing) app for freelancers.
+Check out the [Offline Invoicing](https://github.com/tngoman/Offline_Invoicing) app for freelancers.
 
 **To Customize/Create your own installer**
 
@@ -48,4 +48,4 @@ The default username and password is  **admin**
 - [ ] trasaction export
 - [ ] proper user system
 - [ ] make search fuzzy, and/or language proof
-
+- [ ] transction mistake cash and card
