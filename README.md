@@ -1,7 +1,7 @@
 # Store Point of Sale
  Desktop Point of Sale app built with electron
  
-  **Features:**
+**Features:**
 
 - Can be used by multiple PC's on a network with one central database.
 - Receipt Printing.
@@ -40,3 +40,12 @@ The default username and password is  **admin**
 ![Permissions](https://github.com/tngoman/Store-POS/blob/master/screenshots/permissions.jpg)
 
 ![Users](https://github.com/tngoman/Store-POS/blob/master/screenshots/users.jpg)
+
+# TODO
+
+- [ ] translate to vietnamese
+- [x] implement proper barcode (incl when add product, display it, and search for it when making purchase)
+- [ ] trasaction export
+- [ ] proper user system
+- [ ] make search fuzzy, and/or language proof
+

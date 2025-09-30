@@ -93,6 +93,7 @@ app.post( "/product", upload.single('imagename'), function ( req, res ) {
         category: req.body.category,
         quantity: req.body.quantity == "" ? 0 : req.body.quantity,
         name: req.body.name,
+        skuCode: req.body.skuCode.trim(),
         stock: req.body.stock == "on" ? 0 : 1,    
         img: image        
     }
@@ -120,8 +121,6 @@ app.post( "/product", upload.single('imagename'), function ( req, res ) {
 
 });
 
-
-
  
 app.delete( "/product/:productId", function ( req, res ) {
     inventoryDB.remove( {
@@ -137,7 +136,7 @@ app.delete( "/product/:productId", function ( req, res ) {
 app.post( "/product/sku", function ( req, res ) {
     var request = req.body;
     inventoryDB.findOne( {
-            _id: parseInt(request.skuCode)
+            skuCode: request.skuCode.trim()
     }, function ( err, product ) {
          res.send( product );
     } );
