@@ -65,6 +65,12 @@ let by_user = 0;
 let by_status = 1;
 let skuFocusTarget = "#skuCode"; // "skuCode" | "newSkuCode"
 
+function formatPrice(price) {
+  return parseInt(price)
+    .toString()
+    .replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
 $(function() {
   function cb(start, end) {
     $("#reportrange span").html(
@@ -208,7 +214,7 @@ if (auth == undefined) {
     function loadProducts() {
       $.get(api + "inventory/products", function(data) {
         data.forEach((item) => {
-          item.price = parseFloat(item.price).toFixed(2);
+          item.price = formatPrice(item.price);
         });
 
         allProducts = [...data];
@@ -416,13 +422,9 @@ if (auth == undefined) {
         total += data.quantity * data.price;
       });
       total = total - $("#inputDiscount").val();
-      $("#price").text(settings.symbol + total.toFixed(2));
+      $("#price").text(settings.symbol + formatPrice(total));
 
       subTotal = total;
-
-      if ($("#inputDiscount").val() >= total) {
-        $("#inputDiscount").val(0);
-      }
 
       if (settings.charge_tax) {
         totalVat = (total * vat) / 100;
@@ -431,10 +433,10 @@ if (auth == undefined) {
         grossTotal = total;
       }
 
-      orderTotal = grossTotal.toFixed(2);
+      orderTotal = formatPrice(grossTotal)
 
-      $("#gross_price").text(settings.symbol + grossTotal.toFixed(2));
-      $("#payablePrice").val(grossTotal);
+      $("#gross_price").text(settings.symbol + orderTotal);
+      $("#payablePrice").val(orderTotal);
     };
 
     $.fn.renderTable = function(cartList) {
@@ -443,34 +445,36 @@ if (auth == undefined) {
       $.each(cartList, function(index, data) {
         $("#cartTable > tbody").append(
           $("<tr>").append(
-            $("<td>", { text: index + 1 }),
-            $("<td>", { text: data.product_name }),
-            $("<td>").append(
-              $("<div>", { class: "input-group" }).append(
-                $("<div>", { class: "input-group-btn btn-xs" }).append(
-                  $("<button>", {
-                    class: "btn btn-default btn-xs",
-                    onclick: "$(this).qtDecrement(" + index + ")",
-                  }).append($("<i>", { class: "fa fa-minus" })),
-                ),
-                $("<input>", {
-                  class: "form-control",
-                  type: "number",
-                  value: data.quantity,
-                  onInput: "$(this).qtInput(" + index + ")",
-                }),
-                $("<div>", { class: "input-group-btn btn-xs" }).append(
-                  $("<button>", {
-                    class: "btn btn-default btn-xs",
-                    onclick: "$(this).qtIncrement(" + index + ")",
-                  }).append($("<i>", { class: "fa fa-plus" })),
+            $("<td>", { text: index + 1 }).attr("width", "30px"),
+            $("<td>", { text: data.product_name }).attr("width", "200px"),
+            $("<td>")
+              .attr("width", "180px")
+              .append(
+                $("<div>", { class: "input-group" }).append(
+                  $("<div>", { class: "input-group-btn btn-xs" }).append(
+                    $("<button>", {
+                      class: "btn btn-default btn-xs",
+                      onclick: "$(this).qtDecrement(" + index + ")",
+                    }).append($("<i>", { class: "fa fa-minus" })),
+                  ),
+                  $("<input>", {
+                    class: "form-control",
+                    type: "number",
+                    value: data.quantity,
+                    onInput: "$(this).qtInput(" + index + ")",
+                  }),
+                  $("<div>", { class: "input-group-btn btn-xs" }).append(
+                    $("<button>", {
+                      class: "btn btn-default btn-xs",
+                      onclick: "$(this).qtIncrement(" + index + ")",
+                    }).append($("<i>", { class: "fa fa-plus" })),
+                  ),
                 ),
               ),
-            ),
             $("<td>", {
-              text: settings.symbol + (data.price * data.quantity).toFixed(2),
-            }),
-            $("<td>").append(
+              text: settings.symbol + formatPrice(data.price * data.quantity),
+            }).attr("width", "80px"),
+            $("<td>").attr("width", "30px").append(
               $("<button>", {
                 class: "btn btn-danger btn-xs",
                 onclick: "$(this).deleteFromCart(" + index + ")",
@@ -527,20 +531,20 @@ if (auth == undefined) {
     $.fn.cancelOrder = function() {
       if (cart.length > 0) {
         Swal.fire({
-          title: "Are you sure?",
-          text: "You are about to remove all items from the cart.",
+          title: "Chắc chưa?",
+          text: "Chuẩn bị xóa hết đơn hàng.",
           icon: "warning",
           showCancelButton: true,
           confirmButtonColor: "#3085d6",
           cancelButtonColor: "#d33",
-          confirmButtonText: "Yes, clear it!",
+          confirmButtonText: "Xóa đi",
         }).then((result) => {
           if (result.value) {
             cart = [];
             $(this).renderTable(cart);
             holdOrder = 0;
 
-            Swal.fire("Cleared!", "All items have been removed.", "success");
+            Swal.fire("Đã xóa", "Những mặt hàng trong đơn trước đã bị xóa sạch", "success");
           }
         });
       }
@@ -550,7 +554,7 @@ if (auth == undefined) {
       if (cart.length != 0) {
         $("#paymentModel").modal("toggle");
       } else {
-        Swal.fire("Oops!", "There is nothing to pay!", "warning");
+        Swal.fire("Ủa!!", "Đâu có gì trong đơn mà thanh toán", "warning");
       }
     });
 
@@ -558,7 +562,7 @@ if (auth == undefined) {
       if (cart.length != 0) {
         $("#dueModal").modal("toggle");
       } else {
-        Swal.fire("Oops!", "There is nothing to hold!", "warning");
+        Swal.fire("Ủa!!", "Đâu có gì trong đơn mà cho nợ", "warning");
       }
     });
 
@@ -578,7 +582,7 @@ if (auth == undefined) {
           item.quantity +
           "</td><td>" +
           settings.symbol +
-          parseFloat(item.price).toFixed(2) +
+          formatPrice(item.price) +
           "</td></tr>";
       });
 
@@ -589,13 +593,9 @@ if (auth == undefined) {
       let customer = JSON.parse($("#customer").val());
       let date = moment(currentTime).format("YYYY-MM-DD HH:mm:ss");
       let paid =
-        $("#payment").val() == ""
-          ? ""
-          : parseFloat($("#payment").val()).toFixed(2);
+        $("#payment").val() == "" ? "" : formatPrice($("#payment").val());
       let change =
-        $("#change").text() == ""
-          ? ""
-          : parseFloat($("#change").text()).toFixed(2);
+        $("#change").text() == "" ? "" : formatPrice($("#change").text());
       let refNumber = $("#refNumber").val();
       let orderNumber = holdOrder;
       let type = "";
@@ -636,7 +636,7 @@ if (auth == undefined) {
         tax_row = `<tr>
                     <td>Vat(${settings.percentage})% </td>
                     <td>:</td>
-                    <td>${settings.symbol}${parseFloat(totalVat).toFixed(2)}</td>
+                    <td>${settings.symbol}${formatPrice(totalVat)}</td>
                 </tr>`;
       }
 
@@ -702,7 +702,7 @@ if (auth == undefined) {
             <tr>
                 <td>Discount</td>
                 <td>:</td>
-                <td>${discount > 0 ? settings.symbol + parseFloat(discount).toFixed(2) : ""}</td>
+                <td>${discount > 0 ? settings.symbol + formatPrice(discount) : ""}</td>
             </tr>
             
             ${tax_row}
@@ -711,7 +711,7 @@ if (auth == undefined) {
                 <td><h3>Total</h3></td>
                 <td><h3>:</h3></td>
                 <td>
-                    <h3>${settings.symbol}${parseFloat(orderTotal).toFixed(2)}</h3>
+                    <h3>${settings.symbol}${formatPrice(orderTotal)}</h3>
                 </td>
             </tr>
             ${payment == 0 ? "" : payment}
@@ -743,7 +743,7 @@ if (auth == undefined) {
         discount: discount,
         customer: customer,
         status: status,
-        subtotal: parseFloat(subTotal).toFixed(2),
+        subtotal: formatPrice(subTotal),
         tax: totalVat,
         order_type: 1,
         items: cart,
@@ -769,6 +769,7 @@ if (auth == undefined) {
         processData: false,
         success: function(data) {
           cart = [];
+          $("#inputDiscount").val("");
           $("#viewTransaction").html("");
           $("#viewTransaction").html(receipt);
           $("#orderModal").modal("show");
@@ -1037,7 +1038,7 @@ if (auth == undefined) {
 
     $("#confirmPayment").on("click", function() {
       if ($("#payment").val() == "") {
-        Swal.fire("Nope!", "Please enter the amount that was paid!", "warning");
+        Swal.fire("Không hợp lệ", "Hãy nhập số tiền mà khách đưa bạn", "warning");
       } else {
         $(this).submitDueOrder(1);
       }
@@ -1398,7 +1399,7 @@ if (auth == undefined) {
           return category._id == product.category;
         });
 
-        console.log(product)
+        console.log(product);
 
         product_list +=
           `<tr>
@@ -1806,9 +1807,7 @@ function loadTransactions() {
                     `;
 
         if (counter == transactions.length) {
-          $("#total_sales #counter").text(
-            settings.symbol + parseFloat(sales).toFixed(2),
-          );
+          $("#total_sales #counter").text(settings.symbol + formatPrice(sales));
           $("#total_transactions #counter").text(transact);
 
           const result = {};
@@ -1900,7 +1899,7 @@ function loadSoldProducts() {
             <td>${item.product}</td>
             <td>${item.qty}</td>
             <td>${product[0].stock == 1 ? (product.length > 0 ? product[0].quantity : "") : "N/A"}</td>
-            <td>${settings.symbol + (item.qty * parseFloat(item.price)).toFixed(2)}</td>
+            <td>${settings.symbol + item.qty * parseInt(item.price)}</td>
             </tr>`;
 
     if (counter == sold.length) {
@@ -1915,8 +1914,8 @@ function userFilter(users) {
   $("#users").empty();
   $("#users").append(`<option value="0">All</option>`);
 
-  console.log(users)
-  console.log(allUsers)
+  console.log(users);
+  console.log(allUsers);
 
   users.forEach((user) => {
     let u = allUsers.filter(function(usr) {
@@ -1963,7 +1962,7 @@ $.fn.viewTransaction = function(index) {
       item.quantity +
       "</td><td>" +
       settings.symbol +
-      parseFloat(item.price).toFixed(2) +
+      formatPrice(item.price) +
       "</td></tr>";
   });
 
@@ -1998,7 +1997,7 @@ $.fn.viewTransaction = function(index) {
     tax_row = `<tr>
                 <td>Vat(${settings.percentage})% </td>
                 <td>:</td>
-                <td>${settings.symbol}${parseFloat(allTransactions[index].tax).toFixed(2)}</td>
+                <td>${settings.symbol}${formatPrice(allTransactions[index].tax)}</td>
             </tr>`;
   }
 
@@ -2042,7 +2041,7 @@ $.fn.viewTransaction = function(index) {
         <tr>
             <td>Discount</td>
             <td>:</td>
-            <td>${discount > 0 ? settings.symbol + parseFloat(allTransactions[index].discount).toFixed(2) : ""}</td>
+            <td>${discount > 0 ? settings.symbol + formatPrice(allTransactions[index].discount) : ""}</td>
         </tr>
         
         ${tax_row}

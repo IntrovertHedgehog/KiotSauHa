@@ -186,8 +186,8 @@
                            <div class="col-md-7">
                             <table class="table tablesaw-enhanced" id="transactionList">
                                 <thead>
-                                    <tr>                                                                      
-                                        <th>Hoá đơn</th>                                      
+                                    <tr>
+                                        <th>Hoá đơn</th>
                                         <th>Ngày</th>
                                         <th>Tổng tiền</th>
                                         <th>Đã trả</th>
@@ -238,18 +238,16 @@
   
                           <thead>
                           <tr>
-                              <th>#</th>
-                              <th width="150px">Mặt hàng</th>
-                              <th width="170px">Số lượng</th>
-                              <th>Giá</th>
-                              <th width="5px">
+                              <th width="30px">#</th>
+                              <th width="200px">Mặt hàng</th>
+                              <th width="180px">Số lượng</th>
+                              <th width="80px">Giá</th>
+                              <th width="30px">
                                   <button onclick="$(this).cancelOrder()" class="btn btn-danger btn-xs"><i class="fa fa-times"></i></button>
                               </th>
                           </tr>
                           </thead>
                           <tbody>
-  
-  
                           </tbody>
   
                       </table>
@@ -398,20 +396,20 @@
                       <div class="col-md-4">
                           <div class="list-group">
                               <a href="javascript:void(0)" id="cash" onclick="paymentType = 1" class="list-group-item active">
-                                  Cash
+                                  Tiền mặt
                               </a>
-                            <a href="javascript:void(0)" id="card" onclick="paymentType = 3" class="list-group-item">Card</a>
+                            <a href="javascript:void(0)" id="card" onclick="paymentType = 2" class="list-group-item">Chuyển khoản</a>
                           </div>
                       </div>
                       <div class="col-md-8">
                           <div class="input-group">
-                              <span class="input-group-addon" id="basic-addon3">Price <span id="price_curr"></span>
-                              <input id="payablePrice" readonly type="number"  class="form-control" aria-describedby="basic-addon3">
+                              <span class="input-group-addon" id="basic-addon3">Thành tiền <span id="price_curr"></span>
+                              <input id="payablePrice" readonly class="form-control" aria-describedby="basic-addon3">
                           </div>
                           <br>
                           <div class="input-group">
-                              <span class="input-group-addon" id="basic-addon3">Payment  <span id="payment_curr"></span> </span>
-                              <input type="text" placeholder="0.0" class="form-control" id="payment" aria-describedby="basic-addon3">
+                              <span class="input-group-addon" id="basic-addon3">Tiền khách đưa  <span id="payment_curr"></span> </span>
+                              <input type="text" placeholder="0" class="form-control" id="payment" aria-describedby="basic-addon3">
                           </div>
                           <hr>
                           <div class="row">
@@ -483,10 +481,10 @@
               <div class="modal-footer">
                   <div class="row">
                       <div class="col-md-6">
-                        <div class="btn btn-primary btn-block btn-lg waves-effect waves-light">Change <span id="change_curr"></span><span id="change"></span> </div>
+                        <div class="btn btn-primary btn-block btn-lg waves-effect waves-light" style="cursor: default">Tiền thối: <span id="change_curr"></span><span id="change"></span> </div>
                       </div>
                       <div class="col-md-6">
-                        <button type="button" id="confirmPayment" class="btn btn-default btn-block btn-lg waves-effect waves-light">Confirm Payment</button>
+                        <button type="button" id="confirmPayment" class="btn btn-default btn-block btn-lg waves-effect waves-light">Xác nhận</button>
                     </div>
                   </div>
                   

@@ -4,8 +4,8 @@
 }
 
 #card-box tr {display: block; }
-#card-box th, #card-box td:first-child{ width: 10px; }
-#card-box th, #card-box td:nth-child(2){ width: 150px; }
+/* #card-box th:first-child, #card-box td:first-child{ width: 10px; } */
+/* #card-box th:nth-child(2), #card-box td:nth-child(2){ width: 150px; } */
 
 #cartTable tbody { 
   display: block; 
