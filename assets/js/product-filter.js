@@ -94,8 +94,9 @@ $(document).ready(function(){
         if(isDueInput){
             $("#refNumber").val($("#refNumber").val()+""+value)
         }else{
-            $("#payment").val($("#payment").val()+""+value);
-            $(this).calculateChange();
+            const payment = $("#payment")
+            payment.val(payment.val()+""+value);
+            payment.trigger("input")
         }
     }
 
@@ -106,9 +107,9 @@ $(document).ready(function(){
     }
 
     $.fn.calculateChange = function () {
-        var change = $("#payablePrice").val() - $("#payment").val();
+        var change = $(this).priceToInt($("#payablePrice").val()) - $(this).priceToInt($("#payment").val());
         if(change <= 0){
-            $("#change").text(change.toFixed(2));
+            $("#change").text($(this).formatPrice(change));
         }else{
             $("#change").text('0')
         }

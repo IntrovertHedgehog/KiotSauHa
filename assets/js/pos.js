@@ -71,6 +71,14 @@ function formatPrice(price) {
     .replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
+function priceToInt(priceTag) {
+  return parseInt(priceTag.replaceAll(",", ""))
+}
+
+$.fn.formatPrice = formatPrice
+$.fn.priceToInt = priceToInt
+
+
 $(function() {
   function cb(start, end) {
     $("#reportrange span").html(
@@ -161,6 +169,8 @@ if (auth == undefined) {
 
   $.get(api + "settings/get", function(data) {
     settings = data.settings;
+    $("#gross_price").text(`${settings.symbol}0`)
+    $("#price").text(`${settings.symbol}0`)
   });
 
   $.get(api + "users/all", function(users) {
@@ -589,7 +599,6 @@ if (auth == undefined) {
       let currentTime = new Date(moment());
 
       let discount = $("#inputDiscount").val();
-      console.log($("#customer"));
       let customer = JSON.parse($("#customer").val());
       let date = moment(currentTime).format("YYYY-MM-DD HH:mm:ss");
       let paid =
@@ -623,7 +632,7 @@ if (auth == undefined) {
                     <tr>
                         <td>Change</td>
                         <td>:</td>
-                        <td>${settings.symbol + Math.abs(change).toFixed(2)}</td>
+                        <td>${settings.symbol + formatPrice(Math.abs(change))}</td>
                     </tr>
                     <tr>
                         <td>Method</td>
@@ -697,7 +706,7 @@ if (auth == undefined) {
             <tr>                        
                 <td><b>Subtotal</b></td>
                 <td>:</td>
-                <td><b>${settings.symbol}${subTotal.toFixed(2)}</b></td>
+                <td><b>${settings.symbol}${formatPrice(subTotal)}</b></td>
             </tr>
             <tr>
                 <td>Discount</td>
@@ -871,7 +880,7 @@ if (auth == undefined) {
       });
 
       let vat = (totalPrice * data.vat) / 100;
-      totalPrice = (totalPrice + vat - data.discount).toFixed(0);
+      totalPrice = formatPrice(totalPrice + vat - data.discount);
 
       return totalPrice;
     };
@@ -1032,8 +1041,11 @@ if (auth == undefined) {
 
     $("#cardInfo").hide();
 
-    $("#payment").on("input", function() {
+    $("#payment").on("input", function(e) {
       $(this).calculateChange();
+      let val = e.target.value.replace(/\D/g, "");
+      val = formatPrice(priceToInt(val));
+      $(this).val(val);
     });
 
     $("#confirmPayment").on("click", function() {
@@ -1082,7 +1094,6 @@ if (auth == undefined) {
     $("#newSkuCode").on("keydown", function(e) {
       if (e.key === "Enter" || e.keyCode === 13) {
         e.preventDefault();
-        console.log("Shittt");
         // Find all focusable elements
         let $focusable = $(
           "input, select, textarea, button, a[href], [tabindex]:not([tabindex='-1'])",
@@ -1399,8 +1410,6 @@ if (auth == undefined) {
           return category._id == product.category;
         });
 
-        console.log(product);
-
         product_list +=
           `<tr>
             <td>${product.skuCode} ${product.name.normalize("NFKD").replace(/[\u0300-\u036f]/g, "")}</td>
@@ -1563,8 +1572,6 @@ if (auth == undefined) {
     $("#saveUser").on("submit", function(e) {
       e.preventDefault();
       let formData = $(this).serializeObject();
-
-      console.log(formData);
 
       if (ownUserEdit) {
         if (formData.password != atob(user.password)) {
@@ -1750,6 +1757,7 @@ if (auth == undefined) {
 
     $(".loading").hide();
   });
+
 }
 
 $.fn.print = function() {
@@ -1799,7 +1807,7 @@ function loadTransactions() {
                                 <td class="nobr">${moment(trans.date).format("YYYY MMM DD hh:mm:ss")}</td>
                                 <td>${settings.symbol + trans.total}</td>
                                 <td>${trans.paid == "" ? "" : settings.symbol + trans.paid}</td>
-                                <td>${trans.change ? settings.symbol + Math.abs(trans.change).toFixed(2) : ""}</td>
+                                <td>${trans.change ? settings.symbol + formatPrice(Math.abs(trans.change)) : ""}</td>
                                 <td>${trans.paid == "" ? "" : trans.payment_type == 0 ? "Cash" : "Card"}</td>
                                 <td>${trans.till}</td>
                                 <td>${trans.user}</td>
@@ -1914,9 +1922,6 @@ function userFilter(users) {
   $("#users").empty();
   $("#users").append(`<option value="0">All</option>`);
 
-  console.log(users);
-  console.log(allUsers);
-
   users.forEach((user) => {
     let u = allUsers.filter(function(usr) {
       return usr._id == user;
@@ -1984,7 +1989,7 @@ $.fn.viewTransaction = function(index) {
                 <tr>
                     <td>Change</td>
                     <td>:</td>
-                    <td>${settings.symbol + Math.abs(allTransactions[index].change).toFixed(2)}</td>
+                    <td>${settings.symbol + formatPrice(Math.abs(allTransactions[index].change))}</td>
                 </tr>
                 <tr>
                     <td>Method</td>
