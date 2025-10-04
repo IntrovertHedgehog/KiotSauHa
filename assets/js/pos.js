@@ -48,8 +48,8 @@ let customerOrderList = [];
 let ownUserEdit = null;
 let totalPrice = 0;
 let orderTotal = 0;
-let auth_error = "Incorrect username or password";
-let auth_empty = "Please enter a username and password";
+let auth_error = "Tên người dùng và mật khẩu không đúng";
+let auth_empty = "Xin hãy nhập tên người dùng và mật khẩu";
 let holdOrderlocation = $("#randerHoldOrders");
 let customerOrderLocation = $("#randerCustomerOrders");
 let storage = new Store();
@@ -64,6 +64,8 @@ let by_till = 0;
 let by_user = 0;
 let by_status = 1;
 let skuFocusTarget = "#skuCode"; // "skuCode" | "newSkuCode"
+
+console.log(app.getPath("appData"))
 
 function formatPrice(price) {
   return parseInt(price)
@@ -1497,7 +1499,7 @@ if (auth == undefined) {
         showCancelButton: true,
         confirmButtonColor: "#d33",
         cancelButtonColor: "#3085d6",
-        confirmButtonText: "Logout",
+        confirmButtonText: "Đăng xuất",
       }).then((result) => {
         if (result.value) {
           $.get(api + "users/logout/" + user._id, function(data) {
@@ -2113,7 +2115,7 @@ $("body").on("submit", "#account", function(e) {
   let formData = $(this).serializeObject();
 
   if (formData.username == "" || formData.password == "") {
-    Swal.fire("Incomplete form!", auth_empty, "warning");
+    Swal.fire("Không hợp lệ", auth_empty, "warning");
   } else {
     $.ajax({
       url: api + "users/login",
