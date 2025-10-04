@@ -303,8 +303,8 @@ if (auth == undefined) {
           });
         } else {
           Swal.fire(
-            "Out of stock!",
-            "This item is currently unavailable",
+            "Hết hàng",
+            "Mặt hàng này hiện đã hết trong kho",
             "info",
           );
         }
@@ -340,15 +340,15 @@ if (auth == undefined) {
               $("<i>", { class: "glyphicon glyphicon-ok" }),
             );
           } else if (data.quantity < 1) {
-            Swal.fire(
-              "Out of stock!",
-              "This item is currently unavailable",
-              "info",
-            );
+          Swal.fire(
+            "Hết hàng",
+            "Mặt hàng này hiện đã hết trong kho",
+            "info",
+          );
           } else {
             Swal.fire(
-              "Not Found!",
-              "<b>" + $("#skuCode").val() + "</b> is not a valid barcode!",
+              "Không tìm thấy",
+              "<b>" + $("#skuCode").val() + "</b> không phải là mã vạch hợp lệ!",
               "warning",
             );
 
@@ -513,8 +513,8 @@ if (auth == undefined) {
           $(this).renderTable(cart);
         } else {
           Swal.fire(
-            "No more stock!",
-            "You have already added all the available stock.",
+            "Hết hàng!",
+            "Bạn đã thêm toàn bộ hàng còn trong kho",
             "info",
           );
         }
@@ -652,8 +652,8 @@ if (auth == undefined) {
       if (status == 0) {
         if ($("#customer").val() == 0 && $("#refNumber").val() == "") {
           Swal.fire(
-            "Reference Required!",
-            "You either need to select a customer <br> or enter a reference!",
+            "Thiếu số tham chiếu",
+            "Bạn cần nhập số tham chiếu hoặc tên khách hàng",
             "warning",
           );
 
@@ -954,13 +954,13 @@ if (auth == undefined) {
       };
 
       Swal.fire({
-        title: "Delete order?",
-        text: "This will delete the order. Are you sure you want to delete!",
+        title: "Chắc chưa??",
+        text: "Bạn có chắc muốn xóa đơn hàng này không?",
         icon: "warning",
         showCancelButton: true,
         confirmButtonColor: "#3085d6",
         cancelButtonColor: "#d33",
-        confirmButtonText: "Yes, delete it!",
+        confirmButtonText: "Xóa đi!",
       }).then((result) => {
         if (result.value) {
           $.ajax({
@@ -973,7 +973,7 @@ if (auth == undefined) {
               $(this).getHoldOrders();
               $(this).getCustomerOrders();
 
-              Swal.fire("Deleted!", "You have deleted the order!", "success");
+              Swal.fire("Đã xóa!", "Bạn đã xóa thành công đơn hàng", "success");
             },
             error: function(data) {
               $(".loading").hide();
@@ -1013,8 +1013,8 @@ if (auth == undefined) {
         success: function(data) {
           $("#newCustomer").modal("hide");
           Swal.fire(
-            "Customer added!",
-            "Customer added successfully!",
+            "Xong!",
+            "Đã thêm khách hàng thành công.",
             "success",
           );
           $("#customer option:selected").removeAttr("selected");
@@ -1032,7 +1032,7 @@ if (auth == undefined) {
         },
         error: function(data) {
           $("#newCustomer").modal("hide");
-          Swal.fire("Error", "Something went wrong please try again", "error");
+          Swal.fire("Lỗi", "Đã xảy ra lỗi, tôi chả biết lỗi gì nhma có lỗi.", "error");
         },
       });
     });
@@ -1291,13 +1291,13 @@ if (auth == undefined) {
 
     $.fn.deleteUser = function(id) {
       Swal.fire({
-        title: "Are you sure?",
-        text: "You are about to delete this user.",
+        title: "Chắc chưa",
+        text: "Chuẩn bị xóa người dùng",
         icon: "warning",
         showCancelButton: true,
         confirmButtonColor: "#3085d6",
         cancelButtonColor: "#d33",
-        confirmButtonText: "Yes, delete!",
+        confirmButtonText: "Xóa đi",
       }).then((result) => {
         if (result.value) {
           $.ajax({
@@ -1305,7 +1305,7 @@ if (auth == undefined) {
             type: "DELETE",
             success: function(result) {
               loadUserList();
-              Swal.fire("Done!", "User deleted", "success");
+              Swal.fire("Xong", "Đã xóa người dùng", "success");
             },
           });
         }
@@ -1314,13 +1314,13 @@ if (auth == undefined) {
 
     $.fn.deleteCategory = function(id) {
       Swal.fire({
-        title: "Are you sure?",
-        text: "You are about to delete this category.",
+        title: "Chắc chưa",
+        text: "Chuẩn bị xóa thể loại",
         icon: "warning",
         showCancelButton: true,
         confirmButtonColor: "#3085d6",
         cancelButtonColor: "#d33",
-        confirmButtonText: "Yes, delete it!",
+        confirmButtonText: "Xóa đi",
       }).then((result) => {
         if (result.value) {
           $.ajax({
@@ -1328,7 +1328,7 @@ if (auth == undefined) {
             type: "DELETE",
             success: function(result) {
               loadCategories();
-              Swal.fire("Done!", "Category deleted", "success");
+              Swal.fire("Xong", "Đã xóa thể loại", "success");
             },
           });
         }
@@ -1491,8 +1491,8 @@ if (auth == undefined) {
 
     $("#log-out").click(function() {
       Swal.fire({
-        title: "Are you sure?",
-        text: "You are about to log out.",
+        title: "Chắc chưa",
+        text: "Chuẩn bị đăng xuất",
         icon: "warning",
         showCancelButton: true,
         confirmButtonColor: "#d33",
@@ -1530,8 +1530,8 @@ if (auth == undefined) {
 
       if (formData.percentage != "" && !$.isNumeric(formData.percentage)) {
         Swal.fire(
-          "Oops!",
-          "Please make sure the tax value is a number",
+          "Ôi không",
+          "Mã số thuế không hợp lệ",
           "warning",
         );
       } else {
@@ -1557,14 +1557,14 @@ if (auth == undefined) {
       let formData = $(this).serializeObject();
 
       if (formData.till == 0 || formData.till == 1) {
-        Swal.fire("Oops!", "Please enter a number greater than 1.", "warning");
+        Swal.fire("Ôi không", "Hãy nhập một số từ 2 trở lên", "warning");
       } else {
-        if (isNumeric(formData.till)) {
+        if ($.isNumeric(formData.till)) {
           formData["app"] = $("#app").find("option:selected").text();
           storage.set("settings", formData);
           ipcRenderer.send("app-reload", "");
         } else {
-          Swal.fire("Oops!", "Till number must be a number!", "warning");
+          Swal.fire("Ôi không", "Hãy nhập con số hợp lệ", "warning");
         }
       }
     });
