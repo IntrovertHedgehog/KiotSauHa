@@ -48,9 +48,9 @@ Check out the [Offline Invoicing](https://github.com/tngoman/Offline_Invoicing) 
   - [ ] receipt
 - [x] implement proper barcode (incl when add product, display it, and search for it when making purchase)
 - [ ] trasaction export
-- [ ] make search fuzzy, and/or language proof
+- [x] make search fuzzy, and/or language proof
   - [x] for product search
-  - [ ] during check out
+  - [x] during check out
 - [x] transction mistake cash and card
 - [ ] proper user system
   - [ ] hash the password

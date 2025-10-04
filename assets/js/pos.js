@@ -244,6 +244,7 @@ if (auth == undefined) {
           let item_info = `<div class="col-lg-2 box ${item.category}"
                                 onclick="$(this).addToCart(${item._id}, ${item.quantity}, ${item.stock})">
                             <div class="widget-panel widget-style-2 ">                    
+                            <div hidden class="search-term">${item.name.normalize("NFKD").replace(/[\u0300-\u036f]/g, "")}</div>
                             <div id="image"><img src="${item.img == "" ? "./assets/images/default.jpg" : img_path + item.img}" id="product_img" alt=""></div>                    
                                         <div class="text-muted m-t-5 text-center">
                                         <div class="name" id="product_name">${item.name}</div> 
