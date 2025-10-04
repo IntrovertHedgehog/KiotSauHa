@@ -6,10 +6,13 @@ const async = require( "async" );
 const fileUpload = require('express-fileupload');
 const multer = require("multer");
 const fs = require('fs');
+const {getDataHome} = require("platform-folders")
+const {join} = require("upath")
 
+const dataHome = getDataHome()
 
 const storage = multer.diskStorage({
-    destination: process.env.APPDATA+'/POS/uploads',
+    destination: join(dataHome, '/POS/uploads'),
     filename: function(req, file, callback){
         callback(null, Date.now() + '.jpg'); // 
     }
@@ -25,7 +28,7 @@ module.exports = app;
 
  
 let inventoryDB = new Datastore( {
-    filename: process.env.APPDATA+"/POS/server/databases/inventory.db",
+    filename:  join(dataHome, "/POS/server/databases/inventory.db"),
     autoload: true
 } );
 

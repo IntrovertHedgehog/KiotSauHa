@@ -36,10 +36,12 @@
     "nodemon": "^1.14.12",
     "patch-package": "^8.0.0",
     "path": "^0.12.7",
+    "platform-folders": "^0.6.1",
     "postinstall-postinstall": "^2.1.0",
     "print-js": "^1.0.63",
     "socket.io": "^2.4.0",
     "sweetalert2": "^9.5.4",
+    "upath": "^2.0.1",
     "xmlhttprequest": "^1.8.0"
   },
   "scripts": {

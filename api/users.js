@@ -4,12 +4,15 @@ const bodyParser = require( "body-parser" );
 const Datastore = require( "nedb" );
 const btoa = require('btoa');
 app.use( bodyParser.json() );
+const { getDataHome } = require("platform-folders")
+const { join } = require("upath")
 
+const dataHome = getDataHome()
 module.exports = app;
 
  
 let usersDB = new Datastore( {
-    filename: process.env.APPDATA+"/POS/server/databases/users.db",
+    filename: join(dataHome, "/POS/server/databases/users.db"),
     autoload: true
 } );
 

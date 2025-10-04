@@ -3114,6 +3114,13 @@ pkg-up@^3.0.1:
   dependencies:
     find-up "^3.0.0"
 
+platform-folders@^0.6.1:
+  version "0.6.1"
+  resolved "https://registry.yarnpkg.com/platform-folders/-/platform-folders-0.6.1.tgz#b50e546c20ebfeebb40227ff635bb030c6f3be10"
+  integrity sha512-AapKWmRX09cfYv1AjQ4bCeiTcYsJuSIHwLYVqI5fnMrC2Q7ksF5WrcV25RwymUE/x2gdhAMsOLBZcgK6yqLUHQ==
+  dependencies:
+    bindings "^1.5.0"
+
 posix-character-classes@^0.1.0:
   version "0.1.1"
   resolved "https://registry.yarnpkg.com/posix-character-classes/-/posix-character-classes-0.1.1.tgz#01eac0fe3b5af71a2a6c02feabb8c1fef7e00eab"
@@ -4118,6 +4125,11 @@ upath@^1.1.1:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/upath/-/upath-1.2.0.tgz#8f66dbcd55a883acdae4408af8b035a5044c1894"
   integrity sha512-aZwGpamFO61g3OlfT7OQCHqhGnW43ieH9WZeP7QxN/G/jS4jfqUkZxoryvJgVPEcrl5NL/ggHsSmLMHuH64Lhg==
+
+upath@^2.0.1:
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/upath/-/upath-2.0.1.tgz#50c73dea68d6f6b990f51d279ce6081665d61a8b"
+  integrity sha512-1uEe95xksV1O0CYKXo8vQvN1JEbtJp7lb7C5U9HMsIp6IVwntkH/oNUzyVNQSd4S1sYk2FpSSW44FqMc8qee5w==
 
 update-notifier@^2.5.0:
   version "2.5.0"
