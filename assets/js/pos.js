@@ -272,7 +272,7 @@ if (auth == undefined) {
       $.get(api + "categories/all", function(data) {
         allCategories = data;
         loadCategoryList();
-        $("#category").html(`<option value="0">Select</option>`);
+        $("#category").html(`<option value="0">Chọn</option>`);
         allCategories.forEach((category) => {
           $("#category").append(
             `<option value="${category._id}">${category.name}</option>`,
@@ -1107,6 +1107,12 @@ if (auth == undefined) {
       }
     });
 
+    $("#saveProduct").on("formdata", function(e) {
+      const formData = e.originalEvent.formData;
+      const price = formData.get("price")
+      formData.set("price", priceToInt(price))
+    })
+
     $("#saveProduct").submit(function(e) {
       e.preventDefault();
 
@@ -1356,6 +1362,7 @@ if (auth == undefined) {
 
       $.get(api + "users/all", function(users) {
         allUsers = [...users];
+        console.log(allUsers)
 
         users.forEach((user, index) => {
           state = [];
@@ -1458,6 +1465,7 @@ if (auth == undefined) {
 
         category_list += `<tr>
      
+            <td>${category.name.normalize("NFKD").replace(/[\u0300-\u036f]/g, "")}</td>
             <td>${category.name}</td>
             <td><span class="btn-group"><button onClick="$(this).editCategory(${index})" class="btn btn-warning"><i class="fa fa-edit"></i></button><button onClick="$(this).deleteCategory(${category._id})" class="btn btn-danger"><i class="fa fa-trash"></i></button></span></td></tr>`;
       });
@@ -1577,7 +1585,7 @@ if (auth == undefined) {
       if (ownUserEdit) {
         if (formData.password != atob(user.password)) {
           if (formData.password != formData.pass) {
-            Swal.fire("Oops!", "Passwords do not match!", "warning");
+            Swal.fire("Ôi không", "Mật khẩu không khớp", "warning");
           }
         }
       } else {
@@ -2100,6 +2108,12 @@ $("#reportrange").on("apply.daterangepicker", function(ev, picker) {
 
   loadTransactions();
 });
+
+$("#product_price").on("input", function(e) {
+  let val = e.target.value.replace(/\D/g, "");
+  val = formatPrice(priceToInt(val));
+  $(this).val(val);
+})
 
 function authenticate() {
   $("#loading").append(

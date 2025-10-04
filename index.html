@@ -547,7 +547,7 @@
                         <input type="hidden" name="remove" id="remove_img">
                         <div class="form-group">
                             <label for="userName">Mã vạch</label>
-                            <input type="text" required="required"  name="skuCode" parsley-trigger="change" placeholder="Tự gõ hoặc dùng máy quét vạch" class="form-control" id="newSkuCode">
+                            <input type="text" name="skuCode" parsley-trigger="change" placeholder="Tự gõ hoặc dùng máy quét vạch" class="form-control" id="newSkuCode">
                         </div>
                         <div class="form-group">
                             <label for="userName">Thể loại</label>
@@ -686,7 +686,8 @@
                         <table class="table table-bordered" id="categoryList">
                             <thead>
                                 <tr> 
-                                    <th>Tên</th>                                      
+                                    <th>hidden_col</th>
+                                    <th>Tên</th>
                                     <th>Thao tác</th>
                                 </tr>
                             </thead>
@@ -705,7 +706,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                    <h4 class="modal-title" id="mySmallModalLabel">Account Infomarion
+                    <h4 class="modal-title" id="mySmallModalLabel">Thông tin tài khoản
                         <img  class="loading m-t-5" style="margin-left: 35%" height="50px" src="assets/images/loading.gif" alt="">
                     </h4>
                 </div>
@@ -725,7 +726,7 @@
                             <input type="password" name="password" parsley-trigger="change" placeholder="Password" class="form-control" id="password">
                         </div>
                         <div class="form-group">
-                            <label for="userName">Lặp laị Password</label>
+                            <label for="userName">Gõ lại Password</label>
                             <input type="password" name="pass" parsley-trigger="change" placeholder="Repeat" class="form-control" id="pass">
                         </div>
 
@@ -828,7 +829,7 @@
                 <div class="modal-content">
                     <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                        <h4 class="modal-title" id="mySmallModalLabel">Settings
+                        <h4 class="modal-title" id="mySmallModalLabel">Cài đặt
                             <img  class="loading m-t-5" style="margin-left: 35%" height="50px" src="assets/images/loading.gif" alt="">
                         </h4>
                     </div>
@@ -836,30 +837,30 @@
                         
                         
                         <div class="form-group">
-                        <label for="app">Application</label>
+                        <label for="app">Ứng dụng</label>
                         <select name="app" id="app" class="form-control">
-                            <option>Standalone Point of Sale</option>
-                            <option>Network Point of Sale Terminal</option>
-                            <option>Network Point of Sale Server</option>                                            
+                            <option label="Máy thu ngân độc lập">Standalone Point of Sale</option>
+                            <option label="Máy thu ngân đầu cuối">Network Point of Sale Terminal</option>
+                            <option label="Máy chủ">Network Point of Sale Server</option>                                            
                         </select>
                  </div>
 
                 <form id="net_settings_form">
                  <div class="row">
                     <div class="form-group">
-                        <label for="userName">Server IP Address*</label>
-                        <input type="text" required="required" placeholder="Enter the IP address of the admin computer." name="ip" class="form-control" id="ip">
+                        <label for="userName">Địa chỉ IP máy chủ*</label>
+                        <input type="text" required="required" placeholder="192.168.xxx.xxx" name="ip" class="form-control" id="ip">
                     </div>
                     <div class="row">
                             <div class="col-md-5">
                                 <div class="form-group">
-                                    <label for="userName">Till Number*</label>
-                                    <input type="text" required="required" placeholder="Enter a number" name="till" class="form-control" id="till">
+                                    <label for="userName">Số thứ tự*</label>
+                                    <input type="text" required="required" placeholder="Nhập số thứ tự (lớn hơn 1) để định danh máy tính tiền này" name="till" class="form-control" id="till">
                                 </div>
                             </div>
                             <div class="col-md-7">
                                 <div class="form-group">
-                                    <label for="userName">Hardware Identification Number </label>
+                                    <label for="userName">Mã phần cứng (cố định) </label>
                                     <input type="text" required="required" name="mac" class="form-control" id="mac" readonly="readonly">
                                 </div>
                             </div>
@@ -882,36 +883,35 @@
                             <div class="col-md-6">
                                
                                  <div class="form-group">
-                                    <label for="userName">Store Name</label>
+                                    <label for="userName">Tên cửa hàng</label>
                                     <input type="text" required="required"  name="store" class="form-control" id="store">
                                  </div>
                                  <div class="form-group">
-                                        <label for="userName">Address Line 1</label>
+                                        <label for="userName">Địa chỉ (số nhà, tên đường)</label>
                                         <input type="text" required="required"  name="address_one" class="form-control" id="address_one">
                                  </div>
                                  <div class="form-group">
-                                        <label for="userName">Address Line 2</label>
+                                        <label for="userName">Địa chỉ (thành phố/phường, tỉnh)</label>
                                         <input type="text" required="required"  name="address_two" class="form-control" id="address_two">
                                  </div>
                                  <div class="form-group">
-                                        <label for="userName">Contact Number</label>
+                                        <label for="userName">Số điện thoại</label>
                                         <input type="text" name="contact" class="form-control" id="contact">
                                  </div>
                                  <div class="form-group">
-                                        <label for="userName">Vat Number</label>
+                                        <label for="userName">Mã số thuế</label>
                                         <input type="text" name="tax" parsley-trigger="change" class="form-control" id="tax">
                                  </div>
-                              
 
                             </div>
                             <div class="col-md-6">
                                     <div class="form-group">
-                                            <label for="userName">Currency Symbol</label>
+                                            <label for="userName">Kí hiệu tiền tệ</label>
                                             <input type="text" required="required"  name="symbol" class="form-control" id="symbol">
                                      </div>
     
                                      <div class="form-group">
-                                            <label for="userName">Vat Percentage</label>
+                                            <label for="userName">Mức thuế giá trị gia tăng (VAT)</label>
                                             <div style="width: 80%; float:left;">
                                             <input type="text" required="required"  name="percentage" class="form-control" id="percentage">
                                             </div>
@@ -919,16 +919,16 @@
                                      </div>
                                      <br><br>
                                      <div class="form-group">
-                                        <label><input type="checkbox" name="charge_tax" id="charge_tax"> Charge Vat</label>
+                                        <label><input type="checkbox" name="charge_tax" id="charge_tax"> Cộng thuế khi tính tiền?</label>
                                      </div>
                                      <div class="form-group">       
-                                        <label for="userName"><span id="rmv_logo" class="btn btn-xs btn-warning">Remove</span> Logo </label>              
+                                        <label for="userName"><span id="rmv_logo" class="btn btn-xs btn-warning">Xóa</span> Logo </label>              
                                         <div id="current_logo"></div>                                        
                                        
                                         <input type="file" name="imagename" id="logoname">                            
                                     </div>
                                     <div class="form-group">
-                                        <label for="userName">Receipt Footer</label>
+                                        <label for="userName">Chân biên lai</label>
                                         <textarea name="footer" class="form-control" id="footer"></textarea>
                                     </div>                                    
                             </div>
