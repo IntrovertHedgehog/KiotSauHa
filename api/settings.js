@@ -5,7 +5,6 @@ const Datastore = require( "nedb" );
 const multer = require("multer");
 const fileUpload = require('express-fileupload');
 const fs = require('fs');
-const getAppDataPath = require("appdata-path")
 const { getDataHome } = require("platform-folders")
 const { join } = require("upath")
 

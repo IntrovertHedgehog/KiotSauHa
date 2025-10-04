@@ -3,7 +3,6 @@ const server = require( "http" ).Server( app );
 const bodyParser = require( "body-parser" );
 const Datastore = require( "nedb" );
 const async = require( "async" );
-const getAppDataPath = require("appdata-path")
 const { getDataHome } = require("platform-folders")
 const { join } = require("upath")
 
