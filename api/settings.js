@@ -5,10 +5,10 @@ const Datastore = require( "nedb" );
 const multer = require("multer");
 const fileUpload = require('express-fileupload');
 const fs = require('fs');
-const { getDataHome } = require("platform-folders")
+const { getConfigHome } = require("platform-folders")
 const { join } = require("upath")
 
-const dataHome = getDataHome()
+const dataHome = getConfigHome()
 
 const storage = multer.diskStorage({
     destination:  join(dataHome, "/POS/uploads"), filename: function(req, file, callback){

@@ -54,6 +54,6 @@ Check out the [Offline Invoicing](https://github.com/tngoman/Offline_Invoicing) 
 - [x] transction mistake cash and card
 - [ ] proper user system
   - [ ] hash the password
-- [ ] product:
-  - [ ] allow empty barcode
-  - [ ] reformat price
+- [x] product:
+  - [x] allow empty barcode
+  - [x] reformat price

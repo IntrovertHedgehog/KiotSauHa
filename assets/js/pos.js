@@ -34,7 +34,7 @@ let dotInterval = setInterval(function() {
 let Store = require("electron-store");
 const remote = require("@electron/remote");
 const app = remote.app;
-let img_path = app.getPath('appData') + '/POS/uploads/';
+let img_path = app.getPath("appData") + "/POS/uploads/";
 let api = "http://" + host + ":" + port + "/api/";
 let btoa = require("btoa");
 let jsPDF = require("jspdf");
@@ -64,7 +64,7 @@ let by_user = 0;
 let by_status = 1;
 let skuFocusTarget = "#skuCode"; // "skuCode" | "newSkuCode"
 
-console.log(app.getPath("appData"))
+console.log(app.getPath("appData"));
 
 function formatPrice(price) {
   return parseInt(price)
@@ -73,12 +73,11 @@ function formatPrice(price) {
 }
 
 function priceToInt(priceTag) {
-  return parseInt(priceTag.replaceAll(",", ""))
+  return parseInt(priceTag.replaceAll(",", ""));
 }
 
-$.fn.formatPrice = formatPrice
-$.fn.priceToInt = priceToInt
-
+$.fn.formatPrice = formatPrice;
+$.fn.priceToInt = priceToInt;
 
 $(function() {
   function cb(start, end) {
@@ -170,8 +169,8 @@ if (auth == undefined) {
 
   $.get(api + "settings/get", function(data) {
     settings = data.settings;
-    $("#gross_price").text(`${settings.symbol}0`)
-    $("#price").text(`${settings.symbol}0`)
+    $("#gross_price").text(`${settings.symbol}0`);
+    $("#price").text(`${settings.symbol}0`);
   });
 
   $.get(api + "users/all", function(users) {
@@ -303,11 +302,7 @@ if (auth == undefined) {
             $(this).addProductToCart(data);
           });
         } else {
-          Swal.fire(
-            "Hết hàng",
-            "Mặt hàng này hiện đã hết trong kho",
-            "info",
-          );
+          Swal.fire("Hết hàng", "Mặt hàng này hiện đã hết trong kho", "info");
         }
       } else {
         $.get(api + "inventory/product/" + id, function(data) {
@@ -341,15 +336,13 @@ if (auth == undefined) {
               $("<i>", { class: "glyphicon glyphicon-ok" }),
             );
           } else if (data.quantity < 1) {
-          Swal.fire(
-            "Hết hàng",
-            "Mặt hàng này hiện đã hết trong kho",
-            "info",
-          );
+            Swal.fire("Hết hàng", "Mặt hàng này hiện đã hết trong kho", "info");
           } else {
             Swal.fire(
               "Không tìm thấy",
-              "<b>" + $("#skuCode").val() + "</b> không phải là mã vạch hợp lệ!",
+              "<b>" +
+              $("#skuCode").val() +
+              "</b> không phải là mã vạch hợp lệ!",
               "warning",
             );
 
@@ -444,7 +437,7 @@ if (auth == undefined) {
         grossTotal = total;
       }
 
-      orderTotal = formatPrice(grossTotal)
+      orderTotal = formatPrice(grossTotal);
 
       $("#gross_price").text(settings.symbol + orderTotal);
       $("#payablePrice").val(orderTotal);
@@ -485,12 +478,14 @@ if (auth == undefined) {
             $("<td>", {
               text: settings.symbol + formatPrice(data.price * data.quantity),
             }).attr("width", "80px"),
-            $("<td>").attr("width", "30px").append(
-              $("<button>", {
-                class: "btn btn-danger btn-xs",
-                onclick: "$(this).deleteFromCart(" + index + ")",
-              }).append($("<i>", { class: "fa fa-times" })),
-            ),
+            $("<td>")
+              .attr("width", "30px")
+              .append(
+                $("<button>", {
+                  class: "btn btn-danger btn-xs",
+                  onclick: "$(this).deleteFromCart(" + index + ")",
+                }).append($("<i>", { class: "fa fa-times" })),
+              ),
           ),
         );
       });
@@ -555,7 +550,11 @@ if (auth == undefined) {
             $(this).renderTable(cart);
             holdOrder = 0;
 
-            Swal.fire("Đã xóa", "Những mặt hàng trong đơn trước đã bị xóa sạch", "success");
+            Swal.fire(
+              "Đã xóa",
+              "Những mặt hàng trong đơn trước đã bị xóa sạch",
+              "success",
+            );
           }
         });
       }
@@ -1013,11 +1012,7 @@ if (auth == undefined) {
         processData: false,
         success: function(data) {
           $("#newCustomer").modal("hide");
-          Swal.fire(
-            "Xong!",
-            "Đã thêm khách hàng thành công.",
-            "success",
-          );
+          Swal.fire("Xong!", "Đã thêm khách hàng thành công.", "success");
           $("#customer option:selected").removeAttr("selected");
           $("#customer").append(
             $("<option>", {
@@ -1033,7 +1028,11 @@ if (auth == undefined) {
         },
         error: function(data) {
           $("#newCustomer").modal("hide");
-          Swal.fire("Lỗi", "Đã xảy ra lỗi, tôi chả biết lỗi gì nhma có lỗi.", "error");
+          Swal.fire(
+            "Lỗi",
+            "Đã xảy ra lỗi, tôi chả biết lỗi gì nhma có lỗi.",
+            "error",
+          );
         },
       });
     });
@@ -1051,7 +1050,11 @@ if (auth == undefined) {
 
     $("#confirmPayment").on("click", function() {
       if ($("#payment").val() == "") {
-        Swal.fire("Không hợp lệ", "Hãy nhập số tiền mà khách đưa bạn", "warning");
+        Swal.fire(
+          "Không hợp lệ",
+          "Hãy nhập số tiền mà khách đưa bạn",
+          "warning",
+        );
       } else {
         $(this).submitDueOrder(1);
       }
@@ -1107,14 +1110,11 @@ if (auth == undefined) {
       }
     });
 
-    $("#saveProduct").on("formdata", function(e) {
-      const formData = e.originalEvent.formData;
-      const price = formData.get("price")
-      formData.set("price", priceToInt(price))
-    })
-
     $("#saveProduct").submit(function(e) {
       e.preventDefault();
+
+      const price_sel = $("#product_price")
+      price_sel.val(priceToInt(price_sel.val()))
 
       $(this).attr("action", api + "inventory/product");
       $(this).attr("method", "POST");
@@ -1362,7 +1362,7 @@ if (auth == undefined) {
 
       $.get(api + "users/all", function(users) {
         allUsers = [...users];
-        console.log(allUsers)
+        console.log(allUsers);
 
         users.forEach((user, index) => {
           state = [];
@@ -1434,7 +1434,7 @@ if (auth == undefined) {
         if (counter == allProducts.length) {
           $("#product_list").html(product_list);
 
-          products.forEach((pro) => {
+          products.filter(pro => pro.skuCode).forEach((pro) => {
             $("#" + pro._id + "").JsBarcode(pro.skuCode, {
               width: 2,
               height: 25,
@@ -1538,11 +1538,7 @@ if (auth == undefined) {
       );
 
       if (formData.percentage != "" && !$.isNumeric(formData.percentage)) {
-        Swal.fire(
-          "Ôi không",
-          "Mã số thuế không hợp lệ",
-          "warning",
-        );
+        Swal.fire("Ôi không", "Mã số thuế không hợp lệ", "warning");
       } else {
         storage.set("settings", formData);
 
@@ -1766,7 +1762,6 @@ if (auth == undefined) {
 
     $(".loading").hide();
   });
-
 }
 
 $.fn.print = function() {
@@ -2113,7 +2108,7 @@ $("#product_price").on("input", function(e) {
   let val = e.target.value.replace(/\D/g, "");
   val = formatPrice(priceToInt(val));
   $(this).val(val);
-})
+});
 
 function authenticate() {
   $("#loading").append(

@@ -3,10 +3,10 @@ const server = require( "http" ).Server( app );
 const bodyParser = require( "body-parser" );
 const Datastore = require( "nedb" );
 const async = require( "async" );
-const { getDataHome } = require("platform-folders")
+const { getConfigHome } = require("platform-folders")
 const { join } = require("upath")
 
-const dataHome = getDataHome()
+const dataHome = getConfigHome()
 
 app.use( bodyParser.json() );
 

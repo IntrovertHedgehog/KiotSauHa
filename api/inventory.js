@@ -6,10 +6,10 @@ const async = require( "async" );
 const fileUpload = require('express-fileupload');
 const multer = require("multer");
 const fs = require('fs');
-const {getDataHome} = require("platform-folders")
+const {getConfigHome} = require("platform-folders")
 const {join} = require("upath")
 
-const dataHome = getDataHome()
+const dataHome = getConfigHome()
 
 const storage = multer.diskStorage({
     destination: join(dataHome, '/POS/uploads'),

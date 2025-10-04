@@ -3,10 +3,10 @@ let server = require("http").Server(app);
 let bodyParser = require("body-parser");
 let Datastore = require("nedb");
 let Inventory = require("./inventory");
-const { getDataHome } = require("platform-folders")
+const { getConfigHome } = require("platform-folders")
 const { join } = require("upath")
 
-const dataHome = getDataHome()
+const dataHome = getConfigHome()
 app.use(bodyParser.json());
 
 module.exports = app;

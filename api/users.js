@@ -4,10 +4,10 @@ const bodyParser = require( "body-parser" );
 const Datastore = require( "nedb" );
 const btoa = require('btoa');
 app.use( bodyParser.json() );
-const { getDataHome } = require("platform-folders")
+const { getConfigHome } = require("platform-folders")
 const { join } = require("upath")
 
-const dataHome = getDataHome()
+const dataHome = getConfigHome()
 module.exports = app;
 
  
