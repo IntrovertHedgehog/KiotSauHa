@@ -109,7 +109,7 @@
                     <div class="row">               
                         <h3 class="col-md-2">Hoá đơn</h3> 
                         <div class="col-md-1">
-                            <span>Till (để làm gì thì e ko bt)</span>
+                            <span>Máy số:</span>
                             <select id="tills" class="form-control">                              
                             </select>
                         </div>
@@ -262,8 +262,8 @@
                          <div class="col-md-3">: <span id="price"></span></div>
                      </div>
                      <div class="row">
-                         <div class="col-md-3">Giảm giá</div>
-                         <div class="col-md-3"><input class="form-control" type="number" id="inputDiscount" oninput="$(this).calculateCart();"></div>
+                         <div class="col-md-3">Ưu đãi</div>
+                         <div class="col-md-3"><input class="form-control" id="inputDiscount" oninput="$(this).calculateCart();"></div>
                          <div class="col-md-3">Tổng tiền (+ <span id="taxInfo"></span>% VAT)</div>
                          <div class="col-md-3"><h3 id="gross_price"></h3></div>
                      </div>
@@ -389,7 +389,7 @@
           <div class="modal-content">
               <div class="modal-header">
                   <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                  <h4 class="modal-title" id="myLargeModalLabel">Payment</h4>
+                  <h4 class="modal-title" id="myLargeModalLabel">Trả tiền</h4>
               </div>
               <div class="modal-body">
                   <div class="row">
@@ -481,7 +481,7 @@
               <div class="modal-footer">
                   <div class="row">
                       <div class="col-md-6">
-                        <div class="btn btn-primary btn-block btn-lg waves-effect waves-light" style="cursor: default">Tiền thối: <span id="change_curr"></span><span id="change"></span> </div>
+                        <div class="btn btn-primary btn-block btn-lg waves-effect waves-light" style="cursor: default">Tiền thối: <span id="change_curr"></span><span id="change">0</span> </div>
                       </div>
                       <div class="col-md-6">
                         <button type="button" id="confirmPayment" class="btn btn-default btn-block btn-lg waves-effect waves-light">Xác nhận</button>
@@ -813,7 +813,7 @@
     <div class="modal-dialog modal-sm">
         <div class="modal-content">
             <div class="modal-header">
-                <button class="btn btn-sm btn-default" onclick="$(this).print()">Print</button> <br> <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                <button class="btn btn-sm btn-default" onclick="$(this).print()">In 🖨️</button> <br> <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
               </div>
             <div class="modal-body" id="viewTransaction">                 
             </div>
@@ -969,6 +969,7 @@ require('./renderer.js');
     <script src="assets/plugins/dataTables/buttons.html5.min.js"></script>
     <script src="assets/plugins/dataTables/pdfmake.min.js"></script>
     <script src="assets/plugins/dataTables/vfs_fonts.js"></script>
+    <!-- <script src="assets/plugins/notify.js"></script> -->
     <!-- <script src="assets/plugins/jquery-ui/jquery-ui.min.js"></script>
     <script src="assets/plugins/jq-keyboard/jqkeyboard-min.js"></script>
     <script src="assets/plugins/jq-keyboard/jqk.layout.en.js"></script>

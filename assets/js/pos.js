@@ -63,8 +63,14 @@ let by_till = 0;
 let by_user = 0;
 let by_status = 1;
 let skuFocusTarget = "#skuCode"; // "skuCode" | "newSkuCode"
+let justGotIn = true;
 
-console.log(app.getPath("appData"));
+function formatInputPrice(e) {
+  $(this).calculateChange();
+  let val = e.target.value.replace(/\D/g, "");
+  val = formatPrice(priceToInt(val));
+  $(this).val(val);
+}
 
 function formatPrice(price) {
   return parseInt(price)
@@ -73,6 +79,9 @@ function formatPrice(price) {
 }
 
 function priceToInt(priceTag) {
+  if (priceTag == "") {
+    return 0;
+  }
   return parseInt(priceTag.replaceAll(",", ""));
 }
 
@@ -119,6 +128,10 @@ $(function() {
     },
     cb,
   );
+
+  $("#inputDiscount").on("input", formatInputPrice);
+
+  $("#product_price").on("input", formatInputPrice);
 
   cb(start, end);
 });
@@ -426,7 +439,7 @@ if (auth == undefined) {
       $.each(cart, function(index, data) {
         total += data.quantity * data.price;
       });
-      total = total - $("#inputDiscount").val();
+      total = total - priceToInt($("#inputDiscount").val());
       $("#price").text(settings.symbol + formatPrice(total));
 
       subTotal = total;
@@ -438,10 +451,10 @@ if (auth == undefined) {
         grossTotal = total;
       }
 
-      orderTotal = formatPrice(grossTotal);
+      orderTotal = grossTotal;
 
-      $("#gross_price").text(settings.symbol + orderTotal);
-      $("#payablePrice").val(orderTotal);
+      $("#gross_price").text(settings.symbol + formatPrice(orderTotal));
+      $("#payablePrice").val(formatPrice(orderTotal));
     };
 
     $.fn.renderTable = function(cartList) {
@@ -563,6 +576,7 @@ if (auth == undefined) {
 
     $("#payButton").on("click", function() {
       if (cart.length != 0) {
+        paymentType = 1;
         $("#paymentModel").modal("toggle");
       } else {
         Swal.fire("Ủa!!", "Đâu có gì trong đơn mà thanh toán", "warning");
@@ -599,13 +613,11 @@ if (auth == undefined) {
 
       let currentTime = new Date(moment());
 
-      let discount = $("#inputDiscount").val();
+      let discount = priceToInt($("#inputDiscount").val());
       let customer = JSON.parse($("#customer").val());
-      let date = moment(currentTime).format("YYYY-MM-DD HH:mm:ss");
-      let paid =
-        $("#payment").val() == "" ? "" : formatPrice($("#payment").val());
-      let change =
-        $("#change").text() == "" ? "" : formatPrice($("#change").text());
+      let date = moment(currentTime).format("DD/MM/YYYY ss:mm:HH");
+      let paid = priceToInt($("#payment").val() == "" ? "0" : $("#payment").val());
+      let change = priceToInt($("#change").text() == "" ? "0" : $("#change").text());
       let refNumber = $("#refNumber").val();
       let orderNumber = holdOrder;
       let type = "";
@@ -613,30 +625,27 @@ if (auth == undefined) {
 
       switch (paymentType) {
         case 1:
-          type = "Cheque";
+          type = "Tiền mặt";
           break;
 
         case 2:
-          type = "Card";
+          type = "Chuyển khoản";
           break;
-
-        default:
-          type = "Cash";
       }
 
       if (paid != "") {
         payment = `<tr>
-                        <td>Paid</td>
+                        <td>Đã trả</td>
                         <td>:</td>
                         <td>${settings.symbol + paid}</td>
                     </tr>
                     <tr>
-                        <td>Change</td>
+                        <td>Thối</td>
                         <td>:</td>
-                        <td>${settings.symbol + formatPrice(Math.abs(change))}</td>
+                        <td>${settings.symbol + change}</td>
                     </tr>
                     <tr>
-                        <td>Method</td>
+                        <td>Phương thức thanh toán</td>
                         <td>:</td>
                         <td>${type}</td>
                     </tr>`;
@@ -644,7 +653,7 @@ if (auth == undefined) {
 
       if (settings.charge_tax) {
         tax_row = `<tr>
-                    <td>Vat(${settings.percentage})% </td>
+                    <td>Thuế VAT:(${settings.percentage})% </td>
                     <td>:</td>
                     <td>${settings.symbol}${formatPrice(totalVat)}</td>
                 </tr>`;
@@ -684,11 +693,11 @@ if (auth == undefined) {
         <hr>
         <left>
             <p>
-            Order No : ${orderNumber} <br>
-            Ref No : ${refNumber == "" ? orderNumber : refNumber} <br>
-            Customer : ${customer == 0 ? "Khách lạ" : customer.name} <br>
-            Cashier : ${user.fullname} <br>
-            Date : ${date}<br>
+            Hóa đơn số: ${orderNumber} <br>
+            Số tham chiếu: ${refNumber == "" ? orderNumber : refNumber} <br>
+            Tên khách hàng: ${customer == 0 ? "Khách lạ" : customer.name} <br>
+            Thu ngân: ${user.fullname} <br>
+            Ngày, giờ: ${date}<br>
             </p>
 
         </left>
@@ -705,20 +714,20 @@ if (auth == undefined) {
             ${items}                
      
             <tr>                        
-                <td><b>Subtotal</b></td>
+                <td><b>Tổng</b></td>
                 <td>:</td>
                 <td><b>${settings.symbol}${formatPrice(subTotal)}</b></td>
             </tr>
             <tr>
-                <td>Discount</td>
+                <td>Ưu đãi</td>
                 <td>:</td>
-                <td>${discount > 0 ? settings.symbol + formatPrice(discount) : ""}</td>
+                <td>${discount > 0 ? settings.symbol + discount : ""}</td>
             </tr>
             
             ${tax_row}
         
             <tr>
-                <td><h3>Total</h3></td>
+                <td><h3>Thành tiền</h3></td>
                 <td><h3>:</h3></td>
                 <td>
                     <h3>${settings.symbol}${formatPrice(orderTotal)}</h3>
@@ -753,12 +762,12 @@ if (auth == undefined) {
         discount: discount,
         customer: customer,
         status: status,
-        subtotal: formatPrice(subTotal),
+        subtotal: subTotal,
         tax: totalVat,
         order_type: 1,
         items: cart,
         date: currentTime,
-        payment_type: type,
+        payment_type: paymentType,
         payment_info: $("#paymentInfo").val(),
         total: orderTotal,
         paid: paid,
@@ -795,7 +804,7 @@ if (auth == undefined) {
         error: function(data) {
           $(".loading").hide();
           $("#dueModal").modal("toggle");
-          swal(
+          Swal(
             "Something went wrong!",
             "Please refresh this page and try again",
           );
@@ -803,7 +812,7 @@ if (auth == undefined) {
       });
 
       $("#refNumber").val("");
-      $("#change").text("");
+      $("#change").text("0");
       $("#payment").val("");
     };
 
@@ -1042,12 +1051,7 @@ if (auth == undefined) {
 
     $("#cardInfo").hide();
 
-    $("#payment").on("input", function(e) {
-      $(this).calculateChange();
-      let val = e.target.value.replace(/\D/g, "");
-      val = formatPrice(priceToInt(val));
-      $(this).val(val);
-    });
+    $("#payment").on("input", formatInputPrice);
 
     $("#confirmPayment").on("click", function() {
       if ($("#payment").val() == "") {
@@ -1062,6 +1066,7 @@ if (auth == undefined) {
     });
 
     $("#transactions").click(function() {
+      justGotIn = true;
       loadTransactions();
       loadUserList();
 
@@ -1114,8 +1119,8 @@ if (auth == undefined) {
     $("#saveProduct").submit(function(e) {
       e.preventDefault();
 
-      const price_sel = $("#product_price")
-      price_sel.val(priceToInt(price_sel.val()))
+      const price_sel = $("#product_price");
+      price_sel.val(priceToInt(price_sel.val()));
 
       $(this).attr("action", api + "inventory/product");
       $(this).attr("method", "POST");
@@ -1363,7 +1368,6 @@ if (auth == undefined) {
 
       $.get(api + "users/all", function(users) {
         allUsers = [...users];
-        console.log(allUsers);
 
         users.forEach((user, index) => {
           state = [];
@@ -1435,13 +1439,15 @@ if (auth == undefined) {
         if (counter == allProducts.length) {
           $("#product_list").html(product_list);
 
-          products.filter(pro => pro.skuCode).forEach((pro) => {
-            $("#" + pro._id + "").JsBarcode(pro.skuCode, {
-              width: 2,
-              height: 25,
-              fontSize: 14,
+          products
+            .filter((pro) => pro.skuCode)
+            .forEach((pro) => {
+              $("#" + pro._id + "").JsBarcode(pro.skuCode, {
+                width: 2,
+                height: 25,
+                fontSize: 14,
+              });
             });
-          });
 
           $("#productList").DataTable({
             order: [[4, "desc"]],
@@ -1789,6 +1795,7 @@ function loadTransactions() {
       $("#transactionList").DataTable().destroy();
 
       allTransactions = [...transactions];
+      console.log(allTransactions)
 
       transactions.forEach((trans, index) => {
         sales += parseFloat(trans.total);
@@ -1810,40 +1817,41 @@ function loadTransactions() {
         transaction_list += `<tr>
                                 <td>${trans.order}</td>
                                 <td class="nobr">${moment(trans.date).format("YYYY MMM DD hh:mm:ss")}</td>
-                                <td>${settings.symbol + trans.total}</td>
-                                <td>${trans.paid == "" ? "" : settings.symbol + trans.paid}</td>
-                                <td>${trans.change ? settings.symbol + formatPrice(Math.abs(trans.change)) : ""}</td>
-                                <td>${trans.paid == "" ? "" : trans.payment_type == 0 ? "Cash" : "Card"}</td>
+                                <td>${settings.symbol + formatPrice(trans.total)}</td>
+                                <td>${settings.symbol + formatPrice(trans.paid)}</td>
+                                <td>${settings.symbol + formatPrice(Math.abs(trans.change))}</td>
+                                <td>${trans.paid == 0 ? "" : trans.payment_type == 1 ? "Tiền mặt" : "Chuyển khoản"}</td>
                                 <td>${trans.till}</td>
                                 <td>${trans.user}</td>
-                                <td>${trans.paid == "" ? '<button class="btn btn-dark"><i class="fa fa-search-plus"></i></button>' : '<button onClick="$(this).viewTransaction(' + index + ')" class="btn btn-info"><i class="fa fa-search-plus"></i></button></td>'}</tr>
+                                <td>${trans.paid == 0 ? '<button class="btn btn-dark"><i class="fa fa-search-plus"></i></button>' : '<button onClick="$(this).viewTransaction(' + index + ')" class="btn btn-info"><i class="fa fa-search-plus"></i></button></td>'}</tr>
                     `;
 
-        if (counter == transactions.length) {
+      });
+
           $("#total_sales #counter").text(settings.symbol + formatPrice(sales));
           $("#total_transactions #counter").text(transact);
 
           const result = {};
 
           for (const { product_name, price, quantity, id } of sold_items) {
-            if (!result[product_name]) result[product_name] = [];
-            result[product_name].push({ id, price, quantity });
+            if (!result[id]) result[id] = [];
+            result[id].push({ id, price, quantity, product_name });
           }
 
-          for (item in result) {
+          for (let id in result) {
             let price = 0;
             let quantity = 0;
-            let id = 0;
+            let name = 0;
 
-            result[item].forEach((i) => {
-              id = i.id;
+            result[id].forEach((i) => {
+              name = i.product_name
               price = i.price;
               quantity += i.quantity;
             });
 
             sold.push({
               id: id,
-              product: item,
+              product: name,
               qty: quantity,
               price: price,
             });
@@ -1867,15 +1875,10 @@ function loadTransactions() {
             dom: "Bfrtip",
             buttons: ["csv", "excel", "pdf"],
           });
-        }
-      });
-    } else {
-      Swal.fire(
-        "No data!",
-        "No transactions available within the selected criteria",
-        "warning",
-      );
+    } else if (!justGotIn) {
+      $.notify("Không tìm thấy dữ liệu!", "warn")
     }
+    justGotIn = false;
   });
 }
 
@@ -1895,7 +1898,7 @@ function loadSoldProducts() {
   let counter = 0;
   let sold_list = "";
   let items = 0;
-  let products = 0;
+  let products = {};
   $("#product_sales").empty();
 
   sold.forEach((item, index) => {
@@ -1911,8 +1914,8 @@ function loadSoldProducts() {
     sold_list += `<tr>
             <td>${item.product}</td>
             <td>${item.qty}</td>
-            <td>${product[0].stock == 1 ? (product.length > 0 ? product[0].quantity : "") : "N/A"}</td>
-            <td>${settings.symbol + item.qty * parseInt(item.price)}</td>
+            <td>${product.length > 0 ? product[0].stock && product[0].quantity : 0}</td>
+            <td>${settings.symbol + formatPrice(item.qty * parseInt(item.price))}</td>
             </tr>`;
 
     if (counter == sold.length) {
@@ -1977,13 +1980,16 @@ $.fn.viewTransaction = function(index) {
   });
 
   switch (allTransactions[index].payment_type) {
-    case 2:
-      type = "Card";
+    case 1:
+      type = "Tiền mặt";
       break;
 
-    default:
-      type = "Cash";
+    case 2:
+      type = "Chuyển khoản";
+      break;
   }
+
+  let payment = 0;
 
   if (allTransactions[index].paid != "") {
     payment = `<tr>
@@ -2017,8 +2023,8 @@ $.fn.viewTransaction = function(index) {
             <span style="font-size: 22px;">${settings.store}</span> <br>
             ${settings.address_one} <br>
             ${settings.address_two} <br>
-            ${settings.contact != "" ? "Tel: " + settings.contact + "<br>" : ""} 
-            ${settings.tax != "" ? "Vat No: " + settings.tax + "<br>" : ""} 
+            ${settings.contact != "" ? "SĐT: " + settings.contact + "<br>" : ""} 
+            ${settings.tax != "" ? "Mã số thuế: " + settings.tax + "<br>" : ""} 
     </p>
     <hr>
     <left>
@@ -2044,12 +2050,12 @@ $.fn.viewTransaction = function(index) {
         ${items}                
  
         <tr>                        
-            <td><b>Subtotal</b></td>
+            <td><b>Tổng</b></td>
             <td>:</td>
-            <td><b>${settings.symbol}${allTransactions[index].subtotal}</b></td>
+            <td><b>${settings.symbol}${formatPrice(allTransactions[index].subtotal)}</b></td>
         </tr>
         <tr>
-            <td>Discount</td>
+            <td>Ưu đãi</td>
             <td>:</td>
             <td>${discount > 0 ? settings.symbol + formatPrice(allTransactions[index].discount) : ""}</td>
         </tr>
@@ -2103,12 +2109,6 @@ $("#reportrange").on("apply.daterangepicker", function(ev, picker) {
   end_date = picker.endDate.toDate().toJSON();
 
   loadTransactions();
-});
-
-$("#product_price").on("input", function(e) {
-  let val = e.target.value.replace(/\D/g, "");
-  val = formatPrice(priceToInt(val));
-  $(this).val(val);
 });
 
 function authenticate() {

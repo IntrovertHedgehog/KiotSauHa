@@ -111,14 +111,14 @@ $(document).ready(function() {
 
   $.fn.calculateChange = function() {
     var change =
-      $(this).priceToInt($("#payablePrice").val()) -
-      $(this).priceToInt($("#payment").val());
-    if (change <= 0) {
+      $(this).priceToInt($("#payment").val()) - 
+      $(this).priceToInt($("#payablePrice").val())
+    if (change > 0) {
       $("#change").text($(this).formatPrice(change));
     } else {
       $("#change").text("0");
     }
-    if (change <= 0) {
+    if (change >= 0) {
       $("#confirmPayment").show();
     } else {
       $("#confirmPayment").hide();
