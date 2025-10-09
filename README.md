@@ -57,3 +57,6 @@ Check out the [Offline Invoicing](https://github.com/tngoman/Offline_Invoicing) 
 - [x] product:
   - [x] allow empty barcode
   - [x] reformat price
+- [x] handle no data:
+  - [x] reset all visible fields
+  - [x] notify at closest element

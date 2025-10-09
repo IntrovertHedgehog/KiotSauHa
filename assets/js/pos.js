@@ -615,9 +615,13 @@ if (auth == undefined) {
 
       let discount = priceToInt($("#inputDiscount").val());
       let customer = JSON.parse($("#customer").val());
-      let date = moment(currentTime).format("DD/MM/YYYY ss:mm:HH");
-      let paid = priceToInt($("#payment").val() == "" ? "0" : $("#payment").val());
-      let change = priceToInt($("#change").text() == "" ? "0" : $("#change").text());
+      let date = moment(currentTime).format("DD/MM/YYYY HH:mm:ss");
+      let paid = priceToInt(
+        $("#payment").val() == "" ? "0" : $("#payment").val(),
+      );
+      let change = priceToInt(
+        $("#change").text() == "" ? "0" : $("#change").text(),
+      );
       let refNumber = $("#refNumber").val();
       let orderNumber = holdOrder;
       let type = "";
@@ -637,15 +641,15 @@ if (auth == undefined) {
         payment = `<tr>
                         <td>Đã trả</td>
                         <td>:</td>
-                        <td>${settings.symbol + paid}</td>
+                        <td>${settings.symbol + formatPrice(paid)}</td>
                     </tr>
                     <tr>
                         <td>Thối</td>
                         <td>:</td>
-                        <td>${settings.symbol + change}</td>
+                        <td>${settings.symbol + formatPrice(change)}</td>
                     </tr>
                     <tr>
-                        <td>Phương thức thanh toán</td>
+                        <td>Phương thức TT</td>
                         <td>:</td>
                         <td>${type}</td>
                     </tr>`;
@@ -705,9 +709,9 @@ if (auth == undefined) {
         <table width="100%">
             <thead style="text-align: left;">
             <tr>
-                <th>Item</th>
-                <th>Qty</th>
-                <th>Price</th>
+                <th>Mặt hàng</th>
+                <th>SL</th>
+                <th>Giá</th>
             </tr>
             </thead>
             <tbody>
@@ -1790,31 +1794,31 @@ function loadTransactions() {
   let query = `by-date?start=${start_date}&end=${end_date}&user=${by_user}&status=${by_status}&till=${by_till}`;
 
   $.get(api + query, function(transactions) {
-    if (transactions.length > 0) {
-      $("#transaction_list").empty();
-      $("#transactionList").DataTable().destroy();
+    $("#transaction_list").empty();
+    $("#transactionList").DataTable().destroy();
+    $("#product_sales").empty();
+    allTransactions = [];
 
-      allTransactions = [...transactions];
-      console.log(allTransactions)
+    allTransactions = [...transactions];
 
-      transactions.forEach((trans, index) => {
-        sales += parseFloat(trans.total);
-        transact++;
+    transactions.forEach((trans, index) => {
+      sales += parseFloat(trans.total);
+      transact++;
 
-        trans.items.forEach((item) => {
-          sold_items.push(item);
-        });
+      trans.items.forEach((item) => {
+        sold_items.push(item);
+      });
 
-        if (!tills.includes(trans.till)) {
-          tills.push(trans.till);
-        }
+      if (!tills.includes(trans.till)) {
+        tills.push(trans.till);
+      }
 
-        if (!users.includes(trans.user_id)) {
-          users.push(trans.user_id);
-        }
+      if (!users.includes(trans.user_id)) {
+        users.push(trans.user_id);
+      }
 
-        counter++;
-        transaction_list += `<tr>
+      counter++;
+      transaction_list += `<tr>
                                 <td>${trans.order}</td>
                                 <td class="nobr">${moment(trans.date).format("YYYY MMM DD hh:mm:ss")}</td>
                                 <td>${settings.symbol + formatPrice(trans.total)}</td>
@@ -1825,60 +1829,64 @@ function loadTransactions() {
                                 <td>${trans.user}</td>
                                 <td>${trans.paid == 0 ? '<button class="btn btn-dark"><i class="fa fa-search-plus"></i></button>' : '<button onClick="$(this).viewTransaction(' + index + ')" class="btn btn-info"><i class="fa fa-search-plus"></i></button></td>'}</tr>
                     `;
+    });
 
+    const result = {};
+
+    for (const { product_name, price, quantity, id } of sold_items) {
+      if (!result[id]) result[id] = [];
+      result[id].push({ id, price, quantity, product_name });
+    }
+
+    for (let id in result) {
+      let price = 0;
+      let quantity = 0;
+      let name = 0;
+
+      result[id].forEach((i) => {
+        name = i.product_name;
+        price = i.price;
+        quantity += i.quantity;
       });
 
-          $("#total_sales #counter").text(settings.symbol + formatPrice(sales));
-          $("#total_transactions #counter").text(transact);
-
-          const result = {};
-
-          for (const { product_name, price, quantity, id } of sold_items) {
-            if (!result[id]) result[id] = [];
-            result[id].push({ id, price, quantity, product_name });
-          }
-
-          for (let id in result) {
-            let price = 0;
-            let quantity = 0;
-            let name = 0;
-
-            result[id].forEach((i) => {
-              name = i.product_name
-              price = i.price;
-              quantity += i.quantity;
-            });
-
-            sold.push({
-              id: id,
-              product: name,
-              qty: quantity,
-              price: price,
-            });
-          }
-
-          loadSoldProducts();
-
-          if (by_user == 0 && by_till == 0) {
-            userFilter(users);
-            tillFilter(tills);
-          }
-
-          $("#transaction_list").html(transaction_list);
-          $("#transactionList").DataTable({
-            order: [[1, "desc"]],
-            autoWidth: false,
-            info: true,
-            JQueryUI: true,
-            ordering: true,
-            paging: true,
-            dom: "Bfrtip",
-            buttons: ["csv", "excel", "pdf"],
-          });
-    } else if (!justGotIn) {
-      $.notify("Không tìm thấy dữ liệu!", "warn")
+      sold.push({
+        id: id,
+        product: name,
+        qty: quantity,
+        price: price,
+      });
     }
+
+    loadSoldProducts();
+
+    if (by_user == 0 && by_till == 0) {
+      userFilter(users);
+      tillFilter(tills);
+    }
+
+    if (allTransactions.length == 0 && !justGotIn) {
+      $("#reportrange").notify("Không tìm thấy dữ liệu!", {
+        className: "warn",
+        position: "bottom right",
+        autoHideDelay: 1000
+      });
+    }
+
     justGotIn = false;
+
+    $("#total_sales #counter").text(settings.symbol + formatPrice(sales));
+    $("#total_transactions #counter").text(transact);
+    $("#transaction_list").html(transaction_list);
+    $("#transactionList").DataTable({
+      order: [[1, "desc"]],
+      autoWidth: false,
+      info: true,
+      JQueryUI: true,
+      ordering: true,
+      paging: true,
+      dom: "Bfrtip",
+      buttons: ["excel", "pdf", "csv"],
+    });
   });
 }
 
@@ -1898,18 +1906,14 @@ function loadSoldProducts() {
   let counter = 0;
   let sold_list = "";
   let items = 0;
-  let products = {};
   $("#product_sales").empty();
 
   sold.forEach((item, index) => {
     items += item.qty;
-    products++;
 
     let product = allProducts.filter(function(selected) {
       return selected._id == item.id;
     });
-
-    counter++;
 
     sold_list += `<tr>
             <td>${item.product}</td>
@@ -1917,13 +1921,11 @@ function loadSoldProducts() {
             <td>${product.length > 0 ? product[0].stock && product[0].quantity : 0}</td>
             <td>${settings.symbol + formatPrice(item.qty * parseInt(item.price))}</td>
             </tr>`;
-
-    if (counter == sold.length) {
-      $("#total_items #counter").text(items);
-      $("#total_products #counter").text(products);
-      $("#product_sales").html(sold_list);
-    }
   });
+
+  $("#total_items #counter").text(items);
+  $("#total_products #counter").text(sold.length);
+  $("#product_sales").html(sold_list);
 }
 
 function userFilter(users) {
@@ -1955,7 +1957,7 @@ $.fn.viewTransaction = function(index) {
   let discount = allTransactions[index].discount;
   let customer =
     allTransactions[index].customer == 0
-      ? "Walk in Customer"
+      ? "Khách lạ"
       : allTransactions[index].customer.username;
   let refNumber =
     allTransactions[index].ref_number != ""
@@ -1993,17 +1995,17 @@ $.fn.viewTransaction = function(index) {
 
   if (allTransactions[index].paid != "") {
     payment = `<tr>
-                    <td>Paid</td>
+                    <td>Đã trả</td>
                     <td>:</td>
-                    <td>${settings.symbol + allTransactions[index].paid}</td>
+                    <td>${settings.symbol + formatPrice(allTransactions[index].paid)}</td>
                 </tr>
                 <tr>
-                    <td>Change</td>
+                    <td>Thối</td>
                     <td>:</td>
                     <td>${settings.symbol + formatPrice(Math.abs(allTransactions[index].change))}</td>
                 </tr>
                 <tr>
-                    <td>Method</td>
+                    <td>Phương thức TT</td>
                     <td>:</td>
                     <td>${type}</td>
                 </tr>`;
@@ -2011,7 +2013,7 @@ $.fn.viewTransaction = function(index) {
 
   if (settings.charge_tax) {
     tax_row = `<tr>
-                <td>Vat(${settings.percentage})% </td>
+                <td>Thuế VAT:(${settings.percentage})% </td>
                 <td>:</td>
                 <td>${settings.symbol}${formatPrice(allTransactions[index].tax)}</td>
             </tr>`;
@@ -2029,11 +2031,11 @@ $.fn.viewTransaction = function(index) {
     <hr>
     <left>
         <p>
-        Invoice : ${orderNumber} <br>
-        Ref No : ${refNumber} <br>
-        Customer : ${allTransactions[index].customer == 0 ? "Walk in Customer" : allTransactions[index].customer.name} <br>
-        Cashier : ${allTransactions[index].user} <br>
-        Date : ${moment(allTransactions[index].date).format("DD MMM YYYY HH:mm:ss")}<br>
+        Hóa đơn số: ${orderNumber} <br>
+        Số tham chiếu: ${refNumber} <br>
+        Tên khách hàng: ${allTransactions[index].customer == 0 ? "Khách lạ" : allTransactions[index].customer.name} <br>
+        Thu ngân: ${allTransactions[index].user} <br>
+        Ngày, giờ: ${moment(allTransactions[index].date).format("DD/MM/YYYY HH:mm:ss")}<br>
         </p>
 
     </left>
@@ -2041,9 +2043,9 @@ $.fn.viewTransaction = function(index) {
     <table width="100%">
         <thead style="text-align: left;">
         <tr>
-            <th>Item</th>
-            <th>Qty</th>
-            <th>Price</th>
+            <th>Mặt hàng</th>
+            <th>SL</th>
+            <th>Giá</th>
         </tr>
         </thead>
         <tbody>
@@ -2063,10 +2065,10 @@ $.fn.viewTransaction = function(index) {
         ${tax_row}
     
         <tr>
-            <td><h3>Total</h3></td>
+            <td><h3>Tổng</h3></td>
             <td><h3>:</h3></td>
             <td>
-                <h3>${settings.symbol}${allTransactions[index].total}</h3>
+                <h3>${settings.symbol}${formatPrice(allTransactions[index].total)}</h3>
             </td>
         </tr>
         ${payment == 0 ? "" : payment}
