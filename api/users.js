@@ -76,6 +76,7 @@ app.post("/login", function(req, res) {
         bcrypt.compare(req.body.password, docs.password, (err, result) => {
           if (err) {
             console.error(err);
+            res.status(500).send("Lỗi máy chủ, lên hệ Minh để giải quyết");
             return;
           }
 
@@ -91,10 +92,14 @@ app.post("/login", function(req, res) {
               },
               {},
             );
-            docs.password = "giấu đi rồi";
+            delete docs.password;
             res.send(docs);
+          } else {
+            res.status(401).send("Sai mật khẩu");
           }
         });
+      } else {
+        res.status(404).send("Sai tên đăng nhập");
       }
     },
   );
@@ -119,50 +124,54 @@ app.delete("/user/:userId", function(req, res) {
 });
 
 app.post("/post", function(req, res) {
-  let hashedPassword = undefined;
   bcrypt.genSalt(10, (err, salt) => {
-    bcrypt.hash(req.body.password, salt, (err, hash) => {
+    if (err) {
+      console.error(err);
+      res.status(500).send("Lỗi máy chủ, lên hệ Minh để giải quyết");
+      return;
+    }
+    bcrypt.hash(req.body.password, salt, (err, hashedPassword) => {
       if (err) {
         console.error(err);
+        res.status(500).send("Lỗi máy chủ, lên hệ Minh để giải quyết");
         return;
       }
-      hashedPassword = hash;
+
+      let User = {
+        username: req.body.username,
+        password: hashedPassword,
+        fullname: req.body.fullname,
+        perm_products: req.body.perm_products == "on" ? 1 : 0,
+        perm_categories: req.body.perm_categories == "on" ? 1 : 0,
+        perm_transactions: req.body.perm_transactions == "on" ? 1 : 0,
+        perm_users: req.body.perm_users == "on" ? 1 : 0,
+        perm_settings: req.body.perm_settings == "on" ? 1 : 0,
+        status: "",
+      };
+
+      if (req.body.id == "") {
+        User._id = Math.floor(Date.now() / 1000);
+        usersDB.insert(User, function(err, user) {
+          if (err) res.status(500).send(req);
+          else res.send(user);
+        });
+      } else {
+        usersDB.update(
+          {
+            _id: parseInt(req.body.id),
+          },
+          {
+            $set: User,
+          },
+          {},
+          function(err, numReplaced, user) {
+            if (err) res.status(500).send(err);
+            else res.sendStatus(200);
+          },
+        );
+      }
     });
   });
-
-  let User = {
-    username: req.body.username,
-    password: hashedPassword,
-    fullname: req.body.fullname,
-    perm_products: req.body.perm_products == "on" ? 1 : 0,
-    perm_categories: req.body.perm_categories == "on" ? 1 : 0,
-    perm_transactions: req.body.perm_transactions == "on" ? 1 : 0,
-    perm_users: req.body.perm_users == "on" ? 1 : 0,
-    perm_settings: req.body.perm_settings == "on" ? 1 : 0,
-    status: "",
-  };
-
-  if (req.body.id == "") {
-    User._id = Math.floor(Date.now() / 1000);
-    usersDB.insert(User, function(err, user) {
-      if (err) res.status(500).send(req);
-      else res.send(user);
-    });
-  } else {
-    usersDB.update(
-      {
-        _id: parseInt(req.body.id),
-      },
-      {
-        $set: User,
-      },
-      {},
-      function(err, numReplaced, user) {
-        if (err) res.status(500).send(err);
-        else res.sendStatus(200);
-      },
-    );
-  }
 });
 
 app.get("/check", function(req, res) {

@@ -1241,37 +1241,13 @@ if (auth == undefined) {
       $("#user_id").val(allUsers[index]._id);
       $("#fullname").val(allUsers[index].fullname);
       $("#username").val(allUsers[index].username);
-      $("#password").val(atob(allUsers[index].password));
+      $("#password").val();
 
-      if (allUsers[index].perm_products == 1) {
-        $("#perm_products").prop("checked", true);
-      } else {
-        $("#perm_products").prop("checked", false);
-      }
-
-      if (allUsers[index].perm_categories == 1) {
-        $("#perm_categories").prop("checked", true);
-      } else {
-        $("#perm_categories").prop("checked", false);
-      }
-
-      if (allUsers[index].perm_transactions == 1) {
-        $("#perm_transactions").prop("checked", true);
-      } else {
-        $("#perm_transactions").prop("checked", false);
-      }
-
-      if (allUsers[index].perm_users == 1) {
-        $("#perm_users").prop("checked", true);
-      } else {
-        $("#perm_users").prop("checked", false);
-      }
-
-      if (allUsers[index].perm_settings == 1) {
-        $("#perm_settings").prop("checked", true);
-      } else {
-        $("#perm_settings").prop("checked", false);
-      }
+      $("#perm_products").prop("checked", allUsers[index].perm_products);
+      $("#perm_categories").prop("checked", allUsers[index].perm_categories);
+      $("#perm_transactions").prop("checked", allUsers[index].perm_transactions);
+      $("#perm_users").prop("checked", allUsers[index].perm_users);
+      $("#perm_settings").prop("checked", allUsers[index].perm_settings);
 
       $("#userModal").modal("show");
     };
@@ -1589,29 +1565,7 @@ if (auth == undefined) {
       e.preventDefault();
       let formData = $(this).serializeObject();
 
-      if (ownUserEdit) {
-        if (formData.password != atob(user.password)) {
-          if (formData.password != formData.pass) {
-            Swal.fire("Ôi không", "Mật khẩu không khớp", "warning");
-          }
-        }
-      } else {
-        if (
-          allUsers[user_index] &&
-          formData.password != atob(allUsers[user_index].password)
-        ) {
-          if (formData.password != formData.pass) {
-            Swal.fire("Oops!", "Passwords do not match!", "warning");
-          }
-        }
-      }
-
-      if (
-        formData.password == atob(user.password) ||
-        (allUsers[user_index] &&
-          formData.password == atob(allUsers[user_index].password)) ||
-        formData.password == formData.pass
-      ) {
+      if (formData.password == formData.pass) {
         $.ajax({
           url: api + "users/post",
           type: "POST",
@@ -1628,13 +1582,15 @@ if (auth == undefined) {
               loadUserList();
 
               $("#Users").modal("show");
-              Swal.fire("Ok!", "User details saved!", "success");
+              Swal.fire("Ok!", "Đã lưu thông tin người dùng mới", "success");
             }
           },
           error: function(data) {
-            console.log(data);
+            console.error(data)
           },
         });
+      } else {
+        $("#accept-acct-chg").notify("Mật khẩu không khớp", "error")
       }
     });
 
@@ -1662,7 +1618,12 @@ if (auth == undefined) {
       $("#user_id").val(user._id);
       $("#fullname").val(user.fullname);
       $("#username").val(user.username);
-      $("#password").val(atob(user.password));
+      $("#password").val();
+      $("#perm_products").prop("checked", user.perm_products);
+      $("#perm_categories").prop("checked", user.perm_categories);
+      $("#perm_transactions").prop("checked", user.perm_transactions);
+      $("#perm_users").prop("checked", user.perm_users);
+      $("#perm_settings").prop("checked", user.perm_settings);
     });
 
     $("#add-user").click(function() {
@@ -2139,9 +2100,9 @@ $("#reportrange").on("apply.daterangepicker", function(ev, picker) {
 
 function authenticate() {
   $("#loading").append(
-    `<div id="load"><form id="account"><div class="form-group"><input type="text" placeholder="Username" name="username" class="form-control"></div>
-        <div class="form-group"><input type="password" placeholder="Password" name="password" class="form-control"></div>
-        <div class="form-group"><input type="submit" class="btn btn-block btn-default" value="Login"></div></form>`,
+    `<div id="load"><form id="account"><div class="form-group"><input type="text" placeholder="Tên đăng nhập" name="username" class="form-control"></div>
+        <div class="form-group"><input type="password" placeholder="Mật khẩu" name="password" class="form-control"></div>
+        <div class="form-group"><input type="submit" id="login-btn" class="btn btn-block btn-default" value="Đăng nhập"></div></form>`,
   );
 }
 
@@ -2169,7 +2130,7 @@ $("body").on("submit", "#account", function(e) {
         }
       },
       error: function(data) {
-        console.log(data);
+        $("#login-btn").notify(data.responseText, "error")
       },
     });
   }
