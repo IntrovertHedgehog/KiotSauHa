@@ -725,7 +725,7 @@ if (auth == undefined) {
             <tr>
                 <td>Ưu đãi</td>
                 <td>:</td>
-                <td>${discount > 0 ? settings.symbol + discount : ""}</td>
+                <td>${discount > 0 ? settings.symbol + formatPrice(discount) : ""}</td>
             </tr>
             
             ${tax_row}
@@ -1394,7 +1394,7 @@ if (auth == undefined) {
           user_list += `<tr>
             <td>${user.fullname}</td>
             <td>${user.username}</td>
-            <td class="${class_name}">${state.length > 0 ? state[0] : ""} <br><span style="font-size: 11px;"> ${state.length > 0 ? moment(state[1]).format("hh:mm A DD MMM YYYY") : ""}</span></td>
+            <td class="${class_name}">${state.length > 0 ? state[0] : ""} <br><span style="font-size: 11px;"> ${state.length > 0 ? moment(state[1]).format("hh:mm A DD/MM/YYYY") : ""}</span></td>
             <td>${user._id == 1 ? '<span class="btn-group"><button class="btn btn-dark"><i class="fa fa-edit"></i></button><button class="btn btn-dark"><i class="fa fa-trash"></i></button></span>' : '<span class="btn-group"><button onClick="$(this).editUser(' + index + ')" class="btn btn-warning"><i class="fa fa-edit"></i></button><button onClick="$(this).deleteUser(' + user._id + ')" class="btn btn-danger"><i class="fa fa-trash"></i></button></span>'}</td></tr>`;
 
           if (counter == users.length) {
@@ -1820,7 +1820,7 @@ function loadTransactions() {
       counter++;
       transaction_list += `<tr>
                                 <td>${trans.order}</td>
-                                <td class="nobr">${moment(trans.date).format("YYYY MMM DD hh:mm:ss")}</td>
+                                <td class="nobr">${moment(trans.date).format("DD/MM/YYYY HH:mm:ss")}</td>
                                 <td>${settings.symbol + formatPrice(trans.total)}</td>
                                 <td>${settings.symbol + formatPrice(trans.paid)}</td>
                                 <td>${settings.symbol + formatPrice(Math.abs(trans.change))}</td>
@@ -1868,7 +1868,7 @@ function loadTransactions() {
       $("#reportrange").notify("Không tìm thấy dữ liệu!", {
         className: "warn",
         position: "bottom right",
-        autoHideDelay: 1000
+        autoHideDelay: 1000,
       });
     }
 
@@ -1885,7 +1885,31 @@ function loadTransactions() {
       ordering: true,
       paging: true,
       dom: "Bfrtip",
-      buttons: ["excel", "pdf", "csv"],
+      buttons: [
+        "pdf",
+        "csv",
+        {
+          extend: "excel",
+          customize: function(xlsx, btn, dt) {
+            console.log(xlsx);
+            let sheet = xlsx.xl.worksheets["sheet1.xml"];
+            const nrow = dt.page.info().recordsTotal;
+            const re = RegExp(`[${settings.symbol},]`, "g")
+            for (let i = 3; i <= nrow + 2; ++i) {
+              for (let c of ["C", "D", "E"]) {
+                const node = $(`c[r=${c}${i}]`, sheet);
+                const val = node.find("t").text().replaceAll(re, "")
+                node
+                  .removeAttr("t")
+                  .attr("s", 65)
+                  .children("is")
+                  .remove()
+                node.append(`<v>${val}</v>`)
+              }
+            }
+          },
+        },
+      ],
     });
   });
 }
@@ -2057,7 +2081,7 @@ $.fn.viewTransaction = function(index) {
             <td><b>${settings.symbol}${formatPrice(allTransactions[index].subtotal)}</b></td>
         </tr>
         <tr>
-            <td>Ưu đãi</td>
+            <td>Ưu ��ãi</td>
             <td>:</td>
             <td>${discount > 0 ? settings.symbol + formatPrice(allTransactions[index].discount) : ""}</td>
         </tr>

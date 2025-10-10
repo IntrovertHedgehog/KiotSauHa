@@ -176,7 +176,7 @@ app.get("/check", function(req, res) {
           _id: 1,
           username: "admin",
           password:
-            "$2b$10$QXW1UNAtelq5fuTc58sx4u6264LKdd8NuOVNzJWzcBgl6Sm6gkvtC",
+            "$2b$10$fSkagYu7MM77enA7RBvjUuUkAEuIZpLTFVlSEzO2f1QA1H2DEPyCm",
           fullname: "Quản trị viên",
           perm_products: 1,
           perm_categories: 1,

@@ -19,7 +19,7 @@ Desktop Point of Sale app built with electron
 **To use on Windows:**
 [Download](http://www.storepointofsale.com/download/v1/StorePOS.msi) the MSI Installer
 
-The default username and password is admin:vantinh3719542
+The default username and password is admin:sauha3719542
 
 **Looking for a Desktop Invoicing app?**
 
@@ -53,7 +53,9 @@ Check out the [Offline Invoicing](https://github.com/tngoman/Offline_Invoicing) 
   - [x] during check out
 - [x] transction mistake cash and card
 - [ ] proper user system
-  - [ ] hash the password
+  - [ ] hash the password -> use it properly from front end
+  - [ ] better api code response and error
+  - [ ] auth endpoints
 - [x] product:
   - [x] allow empty barcode
   - [x] reformat price
