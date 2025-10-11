@@ -223,7 +223,6 @@ app.get("/check", function(req, res) {
 
 app.get("/verify-token", function(req, res) {
   const result = verify_token(req, res);
-  console.log(result)
   if (result) {
     res.send("Đăng nhập vào phiên thành công");
   } else {

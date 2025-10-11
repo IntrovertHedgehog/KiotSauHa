@@ -8,7 +8,6 @@ module.exports.verify_token = function(req, res) {
   } else {
     try {
       jwt.verify(token, process.env.SECRET_TOKEN);
-      console.log("toi day roi")
       return true;
     } catch (err) {
       console.error(err)
