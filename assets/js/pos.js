@@ -37,7 +37,7 @@ const app = remote.app;
 let img_path = app.getPath("appData") + "/POS/uploads/";
 let api = "http://" + host + ":" + port + "/api/";
 let btoa = require("btoa");
-let jsPDF = require("jspdf");
+let { jsPDF } = require("jspdf");
 let html2canvas = require("html2canvas");
 let JsBarcode = require("jsbarcode");
 let macaddress = require("macaddress");
@@ -64,6 +64,15 @@ let by_user = 0;
 let by_status = 1;
 let skuFocusTarget = "#skuCode"; // "skuCode" | "newSkuCode"
 let justGotIn = true;
+
+const language = {
+  search: "Tìm kiếm",
+  paginate: {
+    previous: "Trước",
+    next: "Sau",
+  },
+  info: "Đang hiển thị mục _START_-_END_ trên tổng cộng _TOTAL_ mục "
+};
 
 function formatInputPrice(e) {
   $(this).calculateChange();
@@ -1417,6 +1426,7 @@ function logOnToSystem() {
               JQueryUI: true,
               ordering: true,
               paging: false,
+              language
             });
           }
         });
@@ -1470,6 +1480,7 @@ function logOnToSystem() {
             JQueryUI: true,
             ordering: true,
             paging: false,
+            language
           });
         }
       });
@@ -1499,6 +1510,7 @@ function logOnToSystem() {
           JQueryUI: true,
           ordering: true,
           paging: false,
+          language
         });
       }
     }
@@ -1763,6 +1775,7 @@ function logOnToSystem() {
       JQueryUI: true,
       ordering: true,
       paging: false,
+      language
     });
 
     $(".loading").hide();
@@ -1900,6 +1913,7 @@ function loadTransactions() {
           },
         },
       ],
+      language,
     });
   });
 }

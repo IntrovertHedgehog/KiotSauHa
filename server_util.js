@@ -1,7 +1,6 @@
 const jwt = require("jsonwebtoken")
 
 module.exports.verify_token = function(req, res) {
-  console.log(req.headers)
   const token = req.header("authorization");
   if (!token) {
     res.status(401).send("please log in");

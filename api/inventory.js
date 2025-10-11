@@ -96,6 +96,15 @@ app.post("/product", upload.single("imagename"), function(req, res) {
     img: image,
   };
 
+  // fake
+  // for (let i = 0; i < 100; ++i) {
+  //   let p = JSON.parse(JSON.stringify(Product))
+  //   p._id = Math.floor(Math.random() * 1000000000);
+  //   inventoryDB.insert(p, function(err, product) {
+  //     console.error(err)
+  //   });
+  // }
+
   if (req.body.id == "") {
     Product._id = Math.floor(Date.now() / 1000);
     inventoryDB.insert(Product, function(err, product) {
