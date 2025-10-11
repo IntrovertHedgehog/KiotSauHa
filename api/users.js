@@ -9,6 +9,7 @@ const { join } = require("upath");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { times } = require("async");
+const { verify_token } = require("../server_util");
 
 const dataHome = getConfigHome();
 module.exports = app;
@@ -25,6 +26,7 @@ app.get("/", function(req, res) {
 });
 
 app.get("/user/:userId", function(req, res) {
+  verify_token(req, res);
   if (!req.params.userId) {
     res.status(500).send("ID field is required.");
   } else {
@@ -66,7 +68,7 @@ app.post("/login", function(req, res) {
     typeof req.body.username != "string" ||
     typeof req.body.password != "string"
   ) {
-    res.status(400).send("invalid username and password")
+    res.status(400).send("invalid username and password");
     return;
   }
 
@@ -85,7 +87,9 @@ app.post("/login", function(req, res) {
 
           if (result) {
             const hour = 60 * 60; // in ms
-            const exp = hour * (Math.floor(Date.now() / (1000 * 24 * hour)) * 24 + 20 + 30 * 24); // to 3am VNT in 30 days
+            const exp =
+              hour *
+              (Math.floor(Date.now() / (1000 * 24 * hour)) * 24 + 20 + 30 * 24); // to 3am VNT in 30 days
             const token = jwt.sign(
               { exp, user_id: docs._id, username: docs.username },
               process.env.SECRET_TOKEN,
@@ -117,12 +121,17 @@ app.post("/login", function(req, res) {
 });
 
 app.get("/all", function(req, res) {
+  verify_token(req, res);
   usersDB.find({}, function(err, docs) {
+    for (let d of docs) {
+      delete d.password;
+    }
     res.send(docs);
   });
 });
 
 app.delete("/user/:userId", function(req, res) {
+  verify_token(req, res);
   usersDB.remove(
     {
       _id: parseInt(req.params.userId),
@@ -135,6 +144,7 @@ app.delete("/user/:userId", function(req, res) {
 });
 
 app.post("/post", function(req, res) {
+  verify_token(req, res);
   bcrypt.genSalt(10, (err, salt) => {
     if (err) {
       console.error(err);
@@ -212,16 +222,11 @@ app.get("/check", function(req, res) {
 });
 
 app.get("/verify-token", function(req, res) {
-  const token = req.header("authorization");
-  if (!token) {
-    res.status(401).send("please log in");
+  const result = verify_token(req, res);
+  console.log(result)
+  if (result) {
+    res.send("Đăng nhập vào phiên thành công");
   } else {
-    try {
-      jwt.verify(token, process.env.SECRET_TOKEN);
-      res.send("Đăng nhập thành công")
-    } catch (err) {
-      console.error(err)
-      res.status(401).send("Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại")
-    }
+    res.status(500).send("Lỗi máy chủ, liên hện ông Minh");
   }
 });
