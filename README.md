@@ -47,14 +47,14 @@ Check out the [Offline Invoicing](https://github.com/tngoman/Offline_Invoicing) 
 - [x] translate to vietnamese
   - [x] receipt
 - [x] implement proper barcode (incl when add product, display it, and search for it when making purchase)
-- [ ] trasaction export
+- [x] trasaction export
 - [x] make search fuzzy, and/or language proof
   - [x] for product search
   - [x] during check out
 - [x] transction mistake cash and card
 - [ ] proper user system
-  - [ ] hash the password -> use it properly from front end
-  - [ ] better api code response and error
+  - [x] hash the password -> use it properly from front end
+  - [x] better api code response and error
   - [ ] auth endpoints
 - [x] product:
   - [x] allow empty barcode

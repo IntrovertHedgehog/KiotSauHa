@@ -24,7 +24,7 @@ let product_index = 0;
 let transaction_index;
 let host = "localhost";
 let path = require("path");
-let port = "8001";
+let port = "8080";
 let moment = require("moment");
 let Swal = require("sweetalert2");
 let { ipcRenderer } = require("electron");
@@ -87,6 +87,18 @@ function priceToInt(priceTag) {
 
 $.fn.formatPrice = formatPrice;
 $.fn.priceToInt = priceToInt;
+
+function resetAjax() {
+  $.ajaxSetup({
+    contentType: "application/json; charset=utf-8",
+    cache: false,
+    headers: {
+      authorization: auth && auth.token,
+    },
+  });
+}
+
+resetAjax()
 
 $(function() {
   function cb(start, end) {
@@ -160,6 +172,28 @@ if (auth == undefined) {
   $("#loading").show();
   authenticate();
 } else {
+  $.ajax({
+    url: api + "users/verify-token",
+    headers: {
+      authorization: auth.token
+    },
+    success: function(data) {
+      console.log(data)
+      resetAjax()
+      logOnToSystem()
+    },
+    error: function(err) {
+      // force login if expire
+      console.error(err)
+      $.get(api + "users/check/", function(data) { });
+      $("#loading").show();
+      authenticate();
+      $.notify(err.responseText, "error");
+    },
+  });
+}
+
+function logOnToSystem() {
   $("#loading").show();
 
   setTimeout(function() {
@@ -338,8 +372,6 @@ if (auth == undefined) {
         url: api + "inventory/product/sku",
         type: "POST",
         data: JSON.stringify(req),
-        contentType: "application/json; charset=utf-8",
-        cache: false,
         processData: false,
         success: function(data) {
           if (data._id != undefined && data.quantity >= 1) {
@@ -787,8 +819,6 @@ if (auth == undefined) {
         url: api + "new",
         type: method,
         data: JSON.stringify(data),
-        contentType: "application/json; charset=utf-8",
-        cache: false,
         processData: false,
         success: function(data) {
           cart = [];
@@ -981,8 +1011,6 @@ if (auth == undefined) {
             url: api + "delete",
             type: "POST",
             data: JSON.stringify(data),
-            contentType: "application/json; charset=utf-8",
-            cache: false,
             success: function(data) {
               $(this).getHoldOrders();
               $(this).getCustomerOrders();
@@ -1021,8 +1049,6 @@ if (auth == undefined) {
         url: api + "customers/customer",
         type: "POST",
         data: JSON.stringify(custData),
-        contentType: "application/json; charset=utf-8",
-        cache: false,
         processData: false,
         success: function(data) {
           $("#newCustomer").modal("hide");
@@ -1245,7 +1271,10 @@ if (auth == undefined) {
 
       $("#perm_products").prop("checked", allUsers[index].perm_products);
       $("#perm_categories").prop("checked", allUsers[index].perm_categories);
-      $("#perm_transactions").prop("checked", allUsers[index].perm_transactions);
+      $("#perm_transactions").prop(
+        "checked",
+        allUsers[index].perm_transactions,
+      );
       $("#perm_users").prop("checked", allUsers[index].perm_users);
       $("#perm_settings").prop("checked", allUsers[index].perm_settings);
 
@@ -1570,8 +1599,6 @@ if (auth == undefined) {
           url: api + "users/post",
           type: "POST",
           data: JSON.stringify(formData),
-          contentType: "application/json; charset=utf-8",
-          cache: false,
           processData: false,
           success: function(data) {
             if (ownUserEdit) {
@@ -1586,11 +1613,11 @@ if (auth == undefined) {
             }
           },
           error: function(data) {
-            console.error(data)
+            console.error(data);
           },
         });
       } else {
-        $("#accept-acct-chg").notify("Mật khẩu không khớp", "error")
+        $("#accept-acct-chg").notify("Mật khẩu không khớp", "error");
       }
     });
 
@@ -1855,17 +1882,13 @@ function loadTransactions() {
             console.log(xlsx);
             let sheet = xlsx.xl.worksheets["sheet1.xml"];
             const nrow = dt.page.info().recordsTotal;
-            const re = RegExp(`[${settings.symbol},]`, "g")
+            const re = RegExp(`[${settings.symbol},]`, "g");
             for (let i = 3; i <= nrow + 2; ++i) {
               for (let c of ["C", "D", "E"]) {
                 const node = $(`c[r=${c}${i}]`, sheet);
-                const val = node.find("t").text().replaceAll(re, "")
-                node
-                  .removeAttr("t")
-                  .attr("s", 65)
-                  .children("is")
-                  .remove()
-                node.append(`<v>${val}</v>`)
+                const val = node.find("t").text().replaceAll(re, "");
+                node.removeAttr("t").attr("s", 65).children("is").remove();
+                node.append(`<v>${val}</v>`);
               }
             }
           },
@@ -2117,12 +2140,10 @@ $("body").on("submit", "#account", function(e) {
       url: api + "users/login",
       type: "POST",
       data: JSON.stringify(formData),
-      contentType: "application/json; charset=utf-8",
-      cache: false,
       processData: false,
       success: function(data) {
         if (data._id) {
-          storage.set("auth", { auth: true });
+          storage.set("auth", { token: data.token });
           storage.set("user", data);
           ipcRenderer.send("app-reload", "");
         } else {
@@ -2130,7 +2151,7 @@ $("body").on("submit", "#account", function(e) {
         }
       },
       error: function(data) {
-        $("#login-btn").notify(data.responseText, "error")
+        $("#login-btn").notify(data.responseText, "error");
       },
     });
   }

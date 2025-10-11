@@ -7,6 +7,8 @@ app.use(bodyParser.json());
 const { getConfigHome } = require("platform-folders");
 const { join } = require("upath");
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+const { times } = require("async");
 
 const dataHome = getConfigHome();
 module.exports = app;
@@ -64,6 +66,7 @@ app.post("/login", function(req, res) {
     typeof req.body.username != "string" ||
     typeof req.body.password != "string"
   ) {
+    res.status(400).send("invalid username and password")
     return;
   }
 
@@ -81,6 +84,13 @@ app.post("/login", function(req, res) {
           }
 
           if (result) {
+            const hour = 60 * 60; // in ms
+            const exp = hour * (Math.floor(Date.now() / (1000 * 24 * hour)) * 24 + 20 + 30 * 24); // to 3am VNT in 30 days
+            const token = jwt.sign(
+              { exp, user_id: docs._id, username: docs.username },
+              process.env.SECRET_TOKEN,
+            );
+
             usersDB.update(
               {
                 _id: docs._id,
@@ -93,6 +103,8 @@ app.post("/login", function(req, res) {
               {},
             );
             delete docs.password;
+            docs.token = token;
+            console.log(docs)
             res.send(docs);
           } else {
             res.status(401).send("Sai mật khẩu");
@@ -198,4 +210,20 @@ app.get("/check", function(req, res) {
       }
     },
   );
+});
+
+app.get("/verify-token", function(req, res) {
+  const token = req.header("authorization");
+  console.log(req.headers)
+  if (!token) {
+    res.status(401).send("please log in");
+  } else {
+    try {
+      const payload = jwt.verify(token, process.env.SECRET_TOKEN);
+      res.send("login succesfully!")
+    } catch (err) {
+      console.log(err)
+      res.status(401).send("Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại")
+    }
+  }
 });

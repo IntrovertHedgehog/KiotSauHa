@@ -1,8 +1,11 @@
+const dotenv = require("dotenv")
 let express = require("express"),
   http = require("http"),
   app = require("express")(),
   server = http.createServer(app),
   bodyParser = require("body-parser");
+
+dotenv.config()
 
 const PORT = process.env.PORT || 8001;
 
