@@ -4,8 +4,22 @@ let express = require("express"),
   app = require("express")(),
   server = http.createServer(app),
   bodyParser = require("body-parser");
+const fs = require('fs')
+const crypto = require("crypto")
+const { join } = require("upath");
+const { getConfigHome } = require("platform-folders");
 
-dotenv.config()
+const dataHome = getConfigHome();
+const env_file = join(dataHome, "POS/server/.env")
+
+dotenv.config({path: env_file})
+
+if (!process.env.SECRET_TOKEN) {
+  process.env.SECRET_TOKEN = crypto.randomBytes(256).toString("hex")
+  fs.writeFile(env_file, `SECRET_TOKEN=${process.env.SECRET_TOKEN}`, function(err) {
+    console.error(err)
+  })
+}
 
 const PORT = process.env.PORT || 8001;
 

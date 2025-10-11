@@ -104,7 +104,6 @@ app.post("/login", function(req, res) {
             );
             delete docs.password;
             docs.token = token;
-            console.log(docs)
             res.send(docs);
           } else {
             res.status(401).send("Sai mật khẩu");
@@ -214,15 +213,14 @@ app.get("/check", function(req, res) {
 
 app.get("/verify-token", function(req, res) {
   const token = req.header("authorization");
-  console.log(req.headers)
   if (!token) {
     res.status(401).send("please log in");
   } else {
     try {
-      const payload = jwt.verify(token, process.env.SECRET_TOKEN);
-      res.send("login succesfully!")
+      jwt.verify(token, process.env.SECRET_TOKEN);
+      res.send("Đăng nhập thành công")
     } catch (err) {
-      console.log(err)
+      console.error(err)
       res.status(401).send("Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại")
     }
   }

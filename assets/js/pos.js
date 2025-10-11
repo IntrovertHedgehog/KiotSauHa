@@ -24,7 +24,7 @@ let product_index = 0;
 let transaction_index;
 let host = "localhost";
 let path = require("path");
-let port = "8080";
+let port = "8001";
 let moment = require("moment");
 let Swal = require("sweetalert2");
 let { ipcRenderer } = require("electron");
@@ -98,7 +98,7 @@ function resetAjax() {
   });
 }
 
-resetAjax()
+resetAjax();
 
 $(function() {
   function cb(start, end) {
@@ -175,16 +175,16 @@ if (auth == undefined) {
   $.ajax({
     url: api + "users/verify-token",
     headers: {
-      authorization: auth.token
+      authorization: auth.token,
     },
     success: function(data) {
-      console.log(data)
-      resetAjax()
-      logOnToSystem()
+      console.log(data);
+      resetAjax();
+      logOnToSystem();
     },
     error: function(err) {
       // force login if expire
-      console.error(err)
+      console.error(err);
       $.get(api + "users/check/", function(data) { });
       $("#loading").show();
       authenticate();
@@ -590,6 +590,7 @@ function logOnToSystem() {
           confirmButtonColor: "#3085d6",
           cancelButtonColor: "#d33",
           confirmButtonText: "Xóa đi",
+          cancelButtonText: "Hủy",
         }).then((result) => {
           if (result.value) {
             cart = [];
@@ -1005,6 +1006,7 @@ function logOnToSystem() {
         confirmButtonColor: "#3085d6",
         cancelButtonColor: "#d33",
         confirmButtonText: "Xóa đi!",
+        cancelButtonText: "Hủy",
       }).then((result) => {
         if (result.value) {
           $.ajax({
@@ -1297,6 +1299,7 @@ function logOnToSystem() {
         confirmButtonColor: "#3085d6",
         cancelButtonColor: "#d33",
         confirmButtonText: "Xóa đi",
+        cancelButtonText: "Hủy",
       }).then((result) => {
         if (result.value) {
           $.ajax({
@@ -1320,6 +1323,7 @@ function logOnToSystem() {
         confirmButtonColor: "#3085d6",
         cancelButtonColor: "#d33",
         confirmButtonText: "Xóa đi",
+        cancelButtonText: "Hủy",
       }).then((result) => {
         if (result.value) {
           $.ajax({
@@ -1343,6 +1347,7 @@ function logOnToSystem() {
         confirmButtonColor: "#3085d6",
         cancelButtonColor: "#d33",
         confirmButtonText: "Xóa đi",
+        cancelButtonText: "Hủy",
       }).then((result) => {
         if (result.value) {
           $.ajax({
@@ -1523,6 +1528,7 @@ function logOnToSystem() {
         confirmButtonColor: "#d33",
         cancelButtonColor: "#3085d6",
         confirmButtonText: "Đăng xuất",
+        cancelButtonText: "Hủy",
       }).then((result) => {
         if (result.value) {
           $.get(api + "users/logout/" + user._id, function(data) {
@@ -2159,13 +2165,14 @@ $("body").on("submit", "#account", function(e) {
 
 $("#quit").click(function() {
   Swal.fire({
-    title: "Are you sure?",
-    text: "You are about to close the application.",
+    title: "Chắc chưa",
+    text: "Bạn chuẩn bị đóng ứng dụng",
     icon: "warning",
     showCancelButton: true,
     confirmButtonColor: "#d33",
     cancelButtonColor: "#3085d6",
-    confirmButtonText: "Close Application",
+    confirmButtonText: "Đóng ứng dụng",
+    cancelButtonText: "Hủy",
   }).then((result) => {
     if (result.value) {
       ipcRenderer.send("app-quit", "");
