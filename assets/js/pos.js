@@ -71,7 +71,9 @@ const language = {
     previous: "Trước",
     next: "Sau",
   },
-  info: "Đang hiển thị mục _START_-_END_ trên tổng cộng _TOTAL_ mục "
+  info: "Hiển thị _START_-_END_ trên _TOTAL_ mục ",
+  infoEmpty: "Không có dữ liệu",
+  lengthMenu: "Hiển thị _MENU_ mục"
 };
 
 function formatInputPrice(e) {
@@ -1425,7 +1427,7 @@ function logOnToSystem() {
               info: true,
               JQueryUI: true,
               ordering: true,
-              paging: false,
+              paging: true,
               language
             });
           }
@@ -1479,7 +1481,7 @@ function logOnToSystem() {
             info: true,
             JQueryUI: true,
             ordering: true,
-            paging: false,
+            paging: true,
             language
           });
         }
@@ -1509,7 +1511,7 @@ function logOnToSystem() {
           info: true,
           JQueryUI: true,
           ordering: true,
-          paging: false,
+          paging: true,
           language
         });
       }
@@ -1774,7 +1776,7 @@ function logOnToSystem() {
       info: true,
       JQueryUI: true,
       ordering: true,
-      paging: false,
+      paging: true,
       language
     });
 
