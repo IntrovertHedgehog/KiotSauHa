@@ -12,13 +12,14 @@ const { getConfigHome } = require("platform-folders");
 const dataHome = getConfigHome();
 const env_file = join(dataHome, "POS/server/.env")
 
+if (!fs.existsSync(env_file)) {
+  fs.writeFileSync(env_file, `SECRET_TOKEN=${process.env.SECRET_TOKEN}`)
+}
+
 dotenv.config({path: env_file})
 
 if (!process.env.SECRET_TOKEN) {
   process.env.SECRET_TOKEN = crypto.randomBytes(256).toString("hex")
-  fs.writeFile(env_file, `SECRET_TOKEN=${process.env.SECRET_TOKEN}`, function(err) {
-    console.error(err)
-  })
 }
 
 const PORT = process.env.PORT || 8001;

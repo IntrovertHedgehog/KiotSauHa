@@ -129,7 +129,8 @@ $(function() {
       timePickerSeconds: true,
       // minDate: '',
       ranges: {
-        "Hôm nay": [moment().startOf("day"), moment()],
+        "Tất cả": [moment(0), moment().add(1, "days").endOf("day")],
+        "Hôm nay": [moment().startOf("day"), moment().endOf("day")],
         "Hôm qua": [
           moment().subtract(1, "days").startOf("day"),
           moment().subtract(1, "days").endOf("day"),
@@ -142,7 +143,7 @@ $(function() {
           moment().subtract(29, "days").startOf("day"),
           moment().endOf("day"),
         ],
-        "Tháng này": [moment().startOf("month"), moment()],
+        "Tháng này": [moment().startOf("month"), moment().endOf("month")],
         "Tháng trước": [
           moment().subtract(1, "month").startOf("month"),
           moment().subtract(1, "month").endOf("month"),
@@ -1800,6 +1801,8 @@ function loadTransactions() {
 
   let counter = 0;
   let transaction_list = "";
+  console.log(new Date(start_date))
+  console.log(new Date(end_date))
   let query = `by-date?start=${start_date}&end=${end_date}&user=${by_user}&status=${by_status}&till=${by_till}`;
 
   $.get(api + query, function(transactions) {

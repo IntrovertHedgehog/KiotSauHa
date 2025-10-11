@@ -9,7 +9,6 @@ module.exports.verify_token = function(req, res) {
       jwt.verify(token, process.env.SECRET_TOKEN);
       return true;
     } catch (err) {
-      console.error(err)
       res.status(401).send("Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại")
     }
   }
