@@ -13,7 +13,7 @@ const { verify_token } = require("../server_util");
 const dataHome = getConfigHome();
 
 const storage = multer.diskStorage({
-  destination: join(dataHome, "/POS/uploads"),
+  destination: join(dataHome, "/KiotSauHa/uploads"),
   filename: function(req, file, callback) {
     callback(null, Date.now() + ".jpg"); //
   },
@@ -26,7 +26,7 @@ app.use(bodyParser.json());
 module.exports = app;
 
 let inventoryDB = new Datastore({
-  filename: join(dataHome, "/POS/server/databases/inventory.db"),
+  filename: join(dataHome, "/KiotSauHa/server/databases/inventory.db"),
   autoload: true,
 });
 

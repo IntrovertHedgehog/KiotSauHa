@@ -12,7 +12,7 @@ const { verify_token } = require("../server_util");
 const dataHome = getConfigHome();
 
 const storage = multer.diskStorage({
-  destination: join(dataHome, "/POS/uploads"),
+  destination: join(dataHome, "/KiotSauHa/uploads"),
   filename: function(req, file, callback) {
     callback(null, Date.now() + ".jpg"); //
   },
@@ -25,7 +25,7 @@ app.use(bodyParser.json());
 module.exports = app;
 
 let settingsDB = new Datastore({
-  filename: join(dataHome, "/POS/server/databases/settings.db"),
+  filename: join(dataHome, "/KiotSauHa/server/databases/settings.db"),
   autoload: true,
 });
 
@@ -59,7 +59,7 @@ app.post("/post", upload.single("imagename"), function(req, res) {
   }
 
   if (req.body.remove == 1) {
-    const path = join(dataHome, "/POS/uploads/", req.body.img);
+    const path = join(dataHome, "/KiotSauHa/uploads/", req.body.img);
     try {
       fs.unlinkSync(path);
     } catch (err) {

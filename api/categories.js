@@ -14,7 +14,7 @@ app.use(bodyParser.json());
 module.exports = app;
 
 let categoryDB = new Datastore({
-  filename: join(dataHome, "/POS/server/databases/categories.db"),
+  filename: join(dataHome, "/KiotSauHa/server/databases/categories.db"),
   autoload: true,
 });
 

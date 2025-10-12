@@ -15,7 +15,7 @@ const dataHome = getConfigHome();
 module.exports = app;
 
 let usersDB = new Datastore({
-  filename: join(dataHome, "/POS/server/databases/users.db"),
+  filename: join(dataHome, "/KiotSauHa/server/databases/users.db"),
   autoload: true,
 });
 

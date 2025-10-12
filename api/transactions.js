@@ -13,7 +13,7 @@ app.use(bodyParser.json());
 module.exports = app;
 
 let transactionsDB = new Datastore({
-  filename: join(dataHome, "/POS/server/databases/transactions.db"),
+  filename: join(dataHome, "/KiotSauHa/server/databases/transactions.db"),
   autoload: true,
 });
 
