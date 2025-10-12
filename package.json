@@ -19,8 +19,8 @@
     "btoa": "^1.2.1",
     "dotenv": "^17.2.3",
     "electron-context-menu": "^0.15.1",
+    "electron-squirrel-startup": "^1.0.1",
     "electron-store": "^5.1.0",
-    "electron-winstaller": "^4.0.0",
     "express": "^4.19.2",
     "express-fileupload": "^1.1.6",
     "html2canvas": "^1.0.0-rc.5",
@@ -46,10 +46,12 @@
     "xmlhttprequest": "^1.8.0"
   },
   "scripts": {
-    "postinstall": "patch-package && electron-builder install-app-deps",
+    "postinstall": "patch-package",
     "electron": "cross-env NODE_ENV=dev nodemon --exec \"\"electron .\"\"",
-    "electron-build": "electron-builder",
-    "package-win": "electron-packager . POS --overwrite --asar=false --platform=win32 --arch=x64 --icon=assets/images/icon.ico --prune=true --out=release-builds --version-string.ProductName=\"POS\""
+    "package-win": "electron-packager . POS --overwrite --asar=false --platform=win32 --arch=x64 --icon=assets/images/icon.ico --prune=true --out=release-builds --version-string.ProductName=\"POS\"",
+    "start": "electron-forge start",
+    "package": "electron-forge package",
+    "make": "electron-forge make"
   },
   "browserslist": {
     "production": [
@@ -64,10 +66,17 @@
     ]
   },
   "devDependencies": {
+    "@electron-forge/cli": "^7.10.2",
+    "@electron-forge/maker-deb": "^7.10.2",
+    "@electron-forge/maker-rpm": "^7.10.2",
+    "@electron-forge/maker-squirrel": "^7.10.2",
+    "@electron-forge/maker-zip": "^7.10.2",
+    "@electron-forge/plugin-auto-unpack-natives": "^7.10.2",
+    "@electron-forge/plugin-fuses": "^7.10.2",
+    "@electron/fuses": "^1.0.0",
     "cross-env": "^6.0.3",
-    "electron-builder": "^21.2.0",
+    "electron": ">=22.3.25",
     "electron-is-dev": "^1.1.0",
-    "nodemon": "^3.1.10",
-    "electron": ">=22.3.25"
+    "nodemon": "^3.1.10"
   }
 }

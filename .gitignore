@@ -3,3 +3,5 @@ Session.vim
 .env
 tmp/
 dist/
+
+out/

@@ -736,8 +736,8 @@ function logOnToSystem() {
             <span style="font-size: 22px;">${settings.store}</span> <br>
             ${settings.address_one} <br>
             ${settings.address_two} <br>
-            ${settings.contact != "" ? "Tel: " + settings.contact + "<br>" : ""} 
-            ${settings.tax != "" ? "Vat No: " + settings.tax + "<br>" : ""} 
+            ${settings.contact != "" ? "Số điện thoại: " + settings.contact + "<br>" : ""} 
+            ${settings.tax != "" ? "Mã số thuế" + settings.tax + "<br>" : ""} 
         </p>
         <hr>
         <left>
