@@ -2,7 +2,7 @@
   "name": "KiotSauHa",
   "version": "0.1.0",
   "description": "Store Point of Sale is a desktop application developed by Hosting Domain and available for free download at www.storepointofsale.com.",
-  "author": "Hosting Domain",
+  "author": "IntrovertHedgehog",
   "private": true,
   "main": "start.js",
   "build": {

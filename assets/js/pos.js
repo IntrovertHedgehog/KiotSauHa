@@ -1207,10 +1207,12 @@ function logOnToSystem() {
         method = "PUT";
       }
 
+      const formData = $(this).serializeObject()
+
       $.ajax({
         type: method,
         url: api + "categories/category",
-        data: $(this).serialize(),
+        data: JSON.stringify(formData),
         success: function(data, textStatus, jqXHR) {
           $("#saveCategory").get(0).reset();
           loadCategories();
