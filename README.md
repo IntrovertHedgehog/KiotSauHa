@@ -1,3 +1,5 @@
+This is a fork from [tngoman/Store-POS](https://github.com/tngoman/Store-POS)
+
 # Store Point of Sale
 
 Desktop Point of Sale app built with electron
