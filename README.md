@@ -63,6 +63,7 @@ Check out the [Offline Invoicing](https://github.com/tngoman/Offline_Invoicing) 
   - [x] allow empty barcode
   - [x] reformat price
   - [x] with best before date - input and sort by it in prod list, filter by close to expire dates
+    - [ ] multiple bestbefore date + quantity
   - [ ] tiered discount
     - [x] one tier
   - [x] when scanned product with multiple skuCode, pop out to reduce 
