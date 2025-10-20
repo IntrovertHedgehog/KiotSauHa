@@ -621,6 +621,9 @@ function logOnToSystem() {
             $("<td>", {
               text: settings.symbol + formatPrice(data.price * data.quantity),
             }).attr("width", "80px"),
+            $("<td>", {
+              text: "-" + settings.symbol + formatPrice(Math.floor(data.quantity / data.quantityDiscountQuant) * data.quantityDiscountAmt),
+            }).attr("width", "80px"),
             $("<td>")
               .attr("width", "30px")
               .append(
