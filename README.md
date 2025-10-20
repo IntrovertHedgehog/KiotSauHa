@@ -46,9 +46,9 @@ Check out the [Offline Invoicing](https://github.com/tngoman/Offline_Invoicing) 
 
 # TODO
 
-- [ ] translate to vietnamese (90%)
+- [x] translate to vietnamese (97%)
   - [x] receipt
-  - [ ] datatables
+  - [x] datatables
 - [x] implement proper barcode (incl when add product, display it, and search for it when making purchase)
 - [x] trasaction export
 - [x] make search fuzzy, and/or language proof
@@ -64,6 +64,7 @@ Check out the [Offline Invoicing](https://github.com/tngoman/Offline_Invoicing) 
   - [x] reformat price
   - [x] with best before date - input and sort by it in prod list, filter by close to expire dates
   - [ ] tiered discount
+    - [x] one tier
   - [x] when scanned product with multiple skuCode, pop out to reduce 
 - [x] handle no data:
   - [x] reset all visible fields
