@@ -142,7 +142,7 @@ app.delete("/product/:productId", function(req, res) {
 app.post("/product/sku", function(req, res) {
   verify_token(req, res);
   var request = req.body;
-  inventoryDB.findOne(
+  inventoryDB.find(
     {
       skuCode: request.skuCode.trim(),
     },

@@ -64,6 +64,7 @@ let by_user = 0;
 let by_status = 1;
 let skuFocusTarget = "#skuCode"; // "skuCode" | "newSkuCode"
 let justGotIn = true;
+let ambiguousProducts = [];
 
 const language = {
   search: "Tìm kiếm",
@@ -73,7 +74,7 @@ const language = {
   },
   info: "Hiển thị _START_-_END_ trên _TOTAL_ mục ",
   infoEmpty: "Không có dữ liệu",
-  lengthMenu: "Hiển thị _MENU_ mục"
+  lengthMenu: "Hiển thị _MENU_ mục",
 };
 
 function formatInputPrice(e) {
@@ -386,16 +387,7 @@ function logOnToSystem() {
         data: JSON.stringify(req),
         processData: false,
         success: function(data) {
-          if (data._id != undefined && data.quantity >= 1) {
-            $(this).addProductToCart(data);
-            $("#searchBarCode").get(0).reset();
-            $("#basic-addon2").empty();
-            $("#basic-addon2").append(
-              $("<i>", { class: "glyphicon glyphicon-ok" }),
-            );
-          } else if (data.quantity < 1) {
-            Swal.fire("Hết hàng", "Mặt hàng này hiện đã hết trong kho", "info");
-          } else {
+          if (data.length == 0) {
             Swal.fire(
               "Không tìm thấy",
               "<b>" +
@@ -409,6 +401,27 @@ function logOnToSystem() {
             $("#basic-addon2").append(
               $("<i>", { class: "glyphicon glyphicon-ok" }),
             );
+          } else if (data.length == 1) {
+            let prod = data[0];
+            if (
+              prod._id != undefined &&
+              (prod.stock == 0 || prod.quantity >= 1)
+            ) {
+              $(this).addProductToCart(prod);
+              $("#searchBarCode").get(0).reset();
+              $("#basic-addon2").empty();
+              $("#basic-addon2").append($("<i>", { class: "glyphicon glyphicon-ok" }));
+            } else if (data.quantity < 1) {
+              Swal.fire(
+                "Hết hàng",
+                "Mặt hàng này hiện đã hết trong kho",
+                "info",
+              );
+            }
+          } else {
+            // more than one product with the skucode
+            ambiguousProducts = data;
+            $(this).pickAmbiguousProduct();
           }
         },
         error: function(data) {
@@ -1207,7 +1220,7 @@ function logOnToSystem() {
         method = "PUT";
       }
 
-      const formData = $(this).serializeObject()
+      const formData = $(this).serializeObject();
 
       $.ajax({
         type: method,
@@ -1238,6 +1251,76 @@ function logOnToSystem() {
       });
     });
 
+    $.fn.addProductTocartFromSkuCode = function(index) {
+      let prod = ambiguousProducts[index];
+      $(this).addProductToCart(prod);
+      $("#searchBarCode").get(0).reset();
+      $("#basic-addon2").empty();
+      $("#basic-addon2").append($("<i>", { class: "glyphicon glyphicon-ok" }));
+      $("#Products").modal("hide");
+    };
+
+    $.fn.pickAmbiguousProduct = function() {
+      let products = ambiguousProducts;
+      $("#Products").modal();
+      let product_list = "";
+      let counter = 0;
+      $("#product_list").empty();
+      $("#productList").DataTable().destroy();
+
+      console.log(products);
+
+      products.forEach((product, index) => {
+        counter++;
+
+        let category = allCategories.filter(function(category) {
+          return category._id == product.category;
+        });
+
+        product_list +=
+          `<tr>
+            <td>${product.skuCode} ${product.name.normalize("NFKD").replace(/[\u0300-\u036f]/g, "")}</td>
+            <td><img id="` +
+          product._id +
+          `"></td>
+            <td><img style="max-height: 50px; max-width: 50px; border: 1px solid #ddd;" src="${product.img == "" ? "./assets/images/default.jpg" : img_path + product.img}" id="product_img"></td>
+            <td>${product.name}</td>
+            <td>${settings.symbol}${product.price}</td>
+            <td>${product.stock == 1 ? product.quantity : "N/A"}</td>
+            <td>${category.length > 0 ? category[0].name : ""}</td>
+            <td class="nobr">
+              <span class="btn-group">
+                <button onClick="$(this).addProductTocartFromSkuCode(${index})" class="btn btn-warning btn-sm"><i class="fa fa-mouse-pointer"></i></button>
+              </span>
+            </td>
+          </tr>`;
+      });
+
+      if (counter == products.length) {
+        $("#product_list").html(product_list);
+
+        products
+          .filter((pro) => pro.skuCode)
+          .forEach((pro) => {
+            $("#" + pro._id + "").JsBarcode(pro.skuCode, {
+              width: 2,
+              height: 25,
+              fontSize: 14,
+            });
+          });
+
+        $("#productList").DataTable({
+          order: [[4, "desc"]],
+          autoWidth: false,
+          info: true,
+          JQueryUI: true,
+          ordering: true,
+          paging: true,
+          language,
+        });
+      }
+    };
+
     $.fn.editProduct = function(index) {
       $("#Products").modal("hide");
 
@@ -1247,7 +1330,7 @@ function logOnToSystem() {
         })
         .prop("selected", true);
 
-      $("#newSkuCode").val(allProducts[index].skuCode)
+      $("#newSkuCode").val(allProducts[index].skuCode);
       $("#productName").val(allProducts[index].name);
       $("#product_price").val(allProducts[index].price);
       $("#quantity").val(allProducts[index].quantity);
@@ -1432,7 +1515,7 @@ function logOnToSystem() {
               JQueryUI: true,
               ordering: true,
               paging: true,
-              language
+              language,
             });
           }
         });
@@ -1486,7 +1569,7 @@ function logOnToSystem() {
             JQueryUI: true,
             ordering: true,
             paging: true,
-            language
+            language,
           });
         }
       });
@@ -1516,7 +1599,7 @@ function logOnToSystem() {
           JQueryUI: true,
           ordering: true,
           paging: true,
-          language
+          language,
         });
       }
     }
@@ -1781,7 +1864,7 @@ function logOnToSystem() {
       JQueryUI: true,
       ordering: true,
       paging: true,
-      language
+      language,
     });
 
     $(".loading").hide();
@@ -1804,8 +1887,8 @@ function loadTransactions() {
 
   let counter = 0;
   let transaction_list = "";
-  console.log(new Date(start_date))
-  console.log(new Date(end_date))
+  console.log(new Date(start_date));
+  console.log(new Date(end_date));
   let query = `by-date?start=${start_date}&end=${end_date}&user=${by_user}&status=${by_status}&till=${by_till}`;
 
   $.get(api + query, function(transactions) {
