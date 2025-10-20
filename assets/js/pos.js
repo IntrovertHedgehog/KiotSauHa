@@ -1247,6 +1247,7 @@ function logOnToSystem() {
         })
         .prop("selected", true);
 
+      $("#newSkuCode").val(allProducts[index].skuCode)
       $("#productName").val(allProducts[index].name);
       $("#product_price").val(allProducts[index].price);
       $("#quantity").val(allProducts[index].quantity);

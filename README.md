@@ -62,6 +62,9 @@ Check out the [Offline Invoicing](https://github.com/tngoman/Offline_Invoicing) 
 - [x] product:
   - [x] allow empty barcode
   - [x] reformat price
+  - [ ] with best before date
 - [x] handle no data:
   - [x] reset all visible fields
   - [x] notify at closest element
+- [ ] multiple skuCode
+  - [ ] when scanned product with multiple skuCode, pop out to reduce 
