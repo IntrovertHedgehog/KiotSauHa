@@ -1489,7 +1489,7 @@ function logOnToSystem() {
 
     $("#expiresIn").on("change", function(event) {
       const val = parseInt(event.target.value);
-      if (val == 0) {
+      if (val == -1) {
         loadProductList();
       } else {
         const thres = moment().add(val, "month").valueOf();
