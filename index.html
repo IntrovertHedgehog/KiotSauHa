@@ -571,10 +571,18 @@
                         <div class="form-group">
                             <label><input type="checkbox" name="hasBestBefore" id="hasBestBefore" style="max-width: 30px; float: left;"> Có hạn sử dụng </label>
                         </div>
-                        <div class="form-group" id="bestBeforeField" style="display:None">
+                        <div class="form-group" id="bestBeforeField" style="display: none">
                             <label for="bestBefore">Hạn sử dụng</label>
                             <input type="text" name="bestBefore" id="bestBefore">
-                  </div>
+                        </div>
+                        <div class="form-group">
+                            <label><input type="checkbox" name="hasQuantityDiscount" id="hasQuantityDiscount" style="max-width: 30px; float: left;"> Có giảm giá theo số lượng </label>
+                        </div>
+                        <div class="form-group" id="quantityDiscountField" style="display: none">
+                            <label>Mua</label>
+                            <input type="text" name="quantityDiscountQuant" id="quantityDiscountQuant" style="width: 40px">
+                            <label>giảm</label><span class="currency"></span> <input type="text" name="quantityDiscountAmt" id="quantityDiscountAmt" style="width: 100px">
+                        </div>
 
                         <div class="form-group">
                             <label for="userName"><span id="rmv_img" class="btn btn-xs btn-warning">Xóa</span> Hình ảnh </label>                      
@@ -627,6 +635,14 @@
                         </h4>                        
                     </div>
                      <div class="modal-body" id="all_products" style="padding: 20px; padding-right: 40px;"> 
+                        <label>Hết hạn trong</label>
+                        <select name="expiresIn" id="expiresIn">
+                          <option value="0">Chọn</option>
+                          <option value="1">1 Tháng</option>
+                          <option value="3">3 Tháng</option>
+                          <option value="6">6 Tháng</option>
+                          <option value="12">12 Tháng</option>
+                        </select>
                         <table class="table table-bordered" id="productList">
                             <thead>
                                 <tr>
@@ -637,6 +653,8 @@
                                     <th>Giá</th>
                                     <th>Số lượng</th>
                                     <th>Thể loại</th>
+                                    <th>Hạn sử dụng</th>
+                                    <th>hidden bestbefore</th>
                                     <th>Thao tác</th>
                                 </tr>
                             </thead>

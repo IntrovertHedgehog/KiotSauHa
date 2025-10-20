@@ -41,6 +41,7 @@ let { jsPDF } = require("jspdf");
 let html2canvas = require("html2canvas");
 let JsBarcode = require("jsbarcode");
 let macaddress = require("macaddress");
+const { flags } = require("socket.io/lib/namespace");
 let categories = [];
 let holdOrderList = [];
 let customerOrderList = [];
@@ -96,7 +97,7 @@ const dateRangeLocale = {
   ],
   customRangeLabel: "Ngày tùy chỉnh",
   applyLabel: "OK",
-  cancelLabel: "Hủy"
+  cancelLabel: "Hủy",
 };
 
 function formatInputPrice(e) {
@@ -133,6 +134,27 @@ function resetAjax() {
 }
 
 resetAjax();
+
+$.fn.reloadCart = function() {
+  let newCart = [];
+  console.log(allProducts)
+  for (let item of cart) {
+    const prod = allProducts.filter((p) => p._id == item.id)[0];
+    newCart.push({
+      id: prod._id,
+      product_name: prod.name,
+      skuCode: prod.skuCode,
+      price: priceToInt(prod.price),
+      hasQuantityDiscount: prod.hasQuantityDiscount,
+      quantityDiscountQuant: prod.quantityDiscountQuant,
+      quantityDiscountAmt: prod.quantityDiscountAmt,
+      quantity: Math.min(prod.quantity, item.quantity),
+    });
+  }
+
+  cart = newCart;
+  $(this).renderTable(cart);
+};
 
 $(function() {
   function cb(start, end) {
@@ -172,7 +194,7 @@ $(function() {
           moment().subtract(1, "month").endOf("month"),
         ],
       },
-      locale: dateRangeLocale
+      locale: dateRangeLocale,
     },
     cb,
   );
@@ -183,11 +205,9 @@ $(function() {
 
   cb(start, end);
 
-  $('input[name="bestBefore"]').daterangepicker({
+  $("#bestBefore").daterangepicker({
     singleDatePicker: true,
     showDropdowns: true,
-    minYear: 1901,
-    maxYear: parseInt(moment().format("YYYY"), 10),
     locale: dateRangeLocale,
   });
 });
@@ -262,6 +282,7 @@ function logOnToSystem() {
     settings = data.settings;
     $("#gross_price").text(`${settings.symbol}0`);
     $("#price").text(`${settings.symbol}0`);
+    $(".currency").text(`  ${settings.symbol}`);
   });
 
   $.get(api + "users/all", function(users) {
@@ -321,6 +342,7 @@ function logOnToSystem() {
         allProducts = [...data];
 
         loadProductList();
+        $(this).reloadCart();
 
         $("#parent").text("");
         $("#categories").html(
@@ -339,7 +361,7 @@ function logOnToSystem() {
                             <div id="image"><img src="${item.img == "" ? "./assets/images/default.jpg" : img_path + item.img}" id="product_img" alt=""></div>                    
                                         <div class="text-muted m-t-5 text-center">
                                         <div class="name" id="product_name">${item.name}</div> 
-                                        <span class="sku">${item.sku}</span>
+                                        <span class="skuCode" style="display:none">${item.skuCode}</span>
                                         <span class="stock">SL </span><span class="count">${item.stock == 1 ? item.quantity : "N/A"}</span></div>
                                         <sp class="text-success text-center"><b data-plugin="counterup">${settings.symbol + item.price}</b> </sp>
                             </div>
@@ -413,7 +435,7 @@ function logOnToSystem() {
       };
 
       $.ajax({
-        url: api + "inventory/product/sku",
+        url: api + "inventory/product/skuCode",
         type: "POST",
         data: JSON.stringify(req),
         processData: false,
@@ -494,8 +516,11 @@ function logOnToSystem() {
       item = {
         id: data._id,
         product_name: data.name,
-        sku: data.sku,
+        skuCode: data.skuCode,
         price: data.price,
+        hasQuantityDiscount: data.hasQuantityDiscount,
+        quantityDiscountQuant: data.quantityDiscountQuant,
+        quantityDiscountAmt: data.quantityDiscountAmt,
         quantity: 1,
       };
 
@@ -505,6 +530,18 @@ function logOnToSystem() {
         cart.push(item);
         $(this).renderTable(cart);
       }
+    };
+
+    $.fn.calculateDiscount = function() {
+      let totalDiscount = 0;
+      $.each(cart, function(index, item) {
+        if (item.hasQuantityDiscount) {
+          totalDiscount +=
+            item.quantityDiscountAmt *
+            Math.floor(item.quantity / item.quantityDiscountQuant);
+        }
+      });
+      $("#inputDiscount").val(formatPrice(totalDiscount));
     };
 
     $.fn.isExist = function(data) {
@@ -526,6 +563,7 @@ function logOnToSystem() {
       let total = 0;
       let grossTotal;
       $("#total").text(cart.length);
+      console.log(cart)
       $.each(cart, function(index, data) {
         total += data.quantity * data.price;
       });
@@ -548,6 +586,7 @@ function logOnToSystem() {
     };
 
     $.fn.renderTable = function(cartList) {
+      $(this).calculateDiscount();
       $("#cartTable > tbody").empty();
       $(this).calculateCart();
       $.each(cartList, function(index, data) {
@@ -630,15 +669,18 @@ function logOnToSystem() {
         item.quantity -= 1;
         $(this).renderTable(cart);
       }
+      $(this).calculateDiscount();
     };
 
     $.fn.qtInput = function(i) {
       item = cart[i];
-      item.quantity = $(this).val();
+      item.quantity = parseInt($(this).val());
+      $(this).calculateDiscount();
       $(this).renderTable(cart);
     };
 
     $.fn.cancelOrder = function() {
+      $("#inputDiscount").val("");
       if (cart.length > 0) {
         Swal.fire({
           title: "Chắc chưa?",
@@ -663,6 +705,7 @@ function logOnToSystem() {
           }
         });
       }
+      $(this).calculateCart();
     };
 
     $("#payButton").on("click", function() {
@@ -1008,7 +1051,7 @@ function logOnToSystem() {
           item = {
             id: product.id,
             product_name: product.product_name,
-            sku: product.sku,
+            skuCode: product.skuCode,
             price: product.price,
             quantity: product.quantity,
           };
@@ -1031,7 +1074,7 @@ function logOnToSystem() {
           item = {
             id: product.id,
             product_name: product.product_name,
-            sku: product.sku,
+            skuCode: product.skuCode,
             price: product.price,
             quantity: product.quantity,
           };
@@ -1215,13 +1258,31 @@ function logOnToSystem() {
         $("#bestBefore").val("");
         $("#bestBeforeField").hide();
       }
-    })
+    });
+
+    $("#quantityDiscountAmt").on("input", formatInputPrice);
+
+    $("#hasQuantityDiscount").on("change", function(event) {
+      if (event.target.checked) {
+        $("#quantityDiscountField").show();
+      } else {
+        $("#quantityDiscountQuant").val("");
+        $("#quantityDiscountAmt").val("");
+        $("#quantityDiscountField").hide();
+      }
+    });
 
     $("#saveProduct").submit(function(e) {
       e.preventDefault();
 
       const price_sel = $("#product_price");
       price_sel.val(priceToInt(price_sel.val()));
+
+      const best_before = $("#bestBefore");
+      best_before.val(moment(best_before.val(), "DD/MM/YYYY").toJSON());
+
+      const quantityAmt = $("#quantityDiscountAmt");
+      quantityAmt.val(priceToInt(quantityAmt.val()));
 
       $(this).attr("action", api + "inventory/product");
       $(this).attr("method", "POST");
@@ -1312,8 +1373,6 @@ function logOnToSystem() {
       $("#product_list").empty();
       $("#productList").DataTable().destroy();
 
-      console.log(products);
-
       products.forEach((product, index) => {
         counter++;
 
@@ -1381,16 +1440,37 @@ function logOnToSystem() {
 
       $("#product_id").val(allProducts[index]._id);
       $("#img").val(allProducts[index].img);
-      $("#hasBestBefore").prop("checked", allProducts[index].hasBestBefore)
-      let bestBeforeQ = $("#bestBefore")
+      $("#hasBestBefore").prop("checked", allProducts[index].hasBestBefore);
+
       if (allProducts[index].hasBestBefore) {
-        bestBeforeQ.show();
-        bestBeforeQ.val(allProducts[index].bestBefore);
-        $("#hasBestBefore").prop("checked", allProducts[index].hasBestBefore)
+        $("#bestBeforeField").show();
+        let dateString = moment(allProducts[index].bestBefore).format(
+          "DD/MM/YYYY",
+        );
+        $("#bestBefore")
+          .val(dateString)
+          .data("daterangepicker")
+          .setStartDate(dateString);
+        $("#bestBefore").data("daterangepicker").setEndDate(dateString);
+        $("#hasBestBefore").prop("checked", allProducts[index].hasBestBefore);
       } else {
-        bestBeforeQ.val("");
-        bestBeforeQ.hide();
+        $("#bestBeforeField").hide();
+        $("#bestBefore").val("");
       }
+
+      $("#hasQuantityDiscount").prop(
+        "checked",
+        allProducts[index].hasQuantityDiscount,
+      );
+
+      if (allProducts[index].hasQuantityDiscount) {
+        $("#quantityDiscountField").show();
+      } else {
+        $("#quantityDiscountField").hide();
+      }
+
+      $("#quantityDiscountQuant").val(allProducts[index].quantityDiscountQuant);
+      $("#quantityDiscountAmt").val(allProducts[index].quantityDiscountAmt);
 
       if (allProducts[index].img != "") {
         $("#imagename").hide();
@@ -1406,6 +1486,25 @@ function logOnToSystem() {
 
       $("#newProduct").modal("show");
     };
+
+    $("#expiresIn").on("change", function(event) {
+      const val = parseInt(event.target.value);
+      if (val == 0) {
+        loadProductList();
+      } else {
+        const thres = moment().add(val, "month").valueOf();
+        const filteredIndices = [];
+        for (let i = 0; i < allProducts.length; ++i) {
+          if (
+            allProducts[i].hasBestBefore &&
+            moment(allProducts[i].bestBefore).valueOf() <= thres
+          ) {
+            filteredIndices.push(i);
+          }
+        }
+        loadProductList(filteredIndices);
+      }
+    });
 
     $("#userModal").on("hide.bs.modal", function() {
       $(".perms").hide();
@@ -1576,15 +1675,19 @@ function logOnToSystem() {
       });
     }
 
-    function loadProductList() {
+    function loadProductList(indices) {
+      if (indices) {
+        indices = new Set(indices);
+      }
       let products = [...allProducts];
       let product_list = "";
-      let counter = 0;
       $("#product_list").empty();
       $("#productList").DataTable().destroy();
 
       products.forEach((product, index) => {
-        counter++;
+        if (indices && !indices.has(index)) {
+          return;
+        }
 
         let category = allCategories.filter(function(category) {
           return category._id == product.category;
@@ -1601,31 +1704,43 @@ function logOnToSystem() {
             <td>${settings.symbol}${product.price}</td>
             <td>${product.stock == 1 ? product.quantity : "N/A"}</td>
             <td>${category.length > 0 ? category[0].name : ""}</td>
+            <td>${product.hasBestBefore ? moment(product.bestBefore).format("DD/MM/YYYY") : ""}</td>
+            <td>${product.hasBestBefore ? moment(product.bestBefore).valueOf() : Infinity}</td>
             <td class="nobr"><span class="btn-group"><button onClick="$(this).editProduct(${index})" class="btn btn-warning btn-sm"><i class="fa fa-edit"></i></button><button onClick="$(this).deleteProduct(${product._id})" class="btn btn-danger btn-sm"><i class="fa fa-trash"></i></button></span></td></tr>`;
+      });
 
-        if (counter == allProducts.length) {
-          $("#product_list").html(product_list);
+      $("#product_list").html(product_list);
 
-          products
-            .filter((pro) => pro.skuCode)
-            .forEach((pro) => {
-              $("#" + pro._id + "").JsBarcode(pro.skuCode, {
-                width: 2,
-                height: 25,
-                fontSize: 14,
-              });
-            });
-
-          $("#productList").DataTable({
-            order: [[4, "desc"]],
-            autoWidth: false,
-            info: true,
-            JQueryUI: true,
-            ordering: true,
-            paging: true,
-            language,
+      products
+        .filter((pro) => pro.skuCode)
+        .forEach((pro) => {
+          $("#" + pro._id + "").JsBarcode(pro.skuCode, {
+            width: 2,
+            height: 25,
+            fontSize: 14,
           });
-        }
+        });
+
+      $("#productList").DataTable({
+        order: [[4, "desc"]],
+        autoWidth: false,
+        info: true,
+        JQueryUI: true,
+        ordering: true,
+        paging: true,
+        language,
+        columns: [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          { orderData: 8 },
+          null,
+          null,
+        ],
       });
     }
 
@@ -1941,8 +2056,6 @@ function loadTransactions() {
 
   let counter = 0;
   let transaction_list = "";
-  console.log(new Date(start_date));
-  console.log(new Date(end_date));
   let query = `by-date?start=${start_date}&end=${end_date}&user=${by_user}&status=${by_status}&till=${by_till}`;
 
   $.get(api + query, function(transactions) {
@@ -2043,7 +2156,6 @@ function loadTransactions() {
         {
           extend: "excel",
           customize: function(xlsx, btn, dt) {
-            console.log(xlsx);
             let sheet = xlsx.xl.worksheets["sheet1.xml"];
             const nrow = dt.page.info().recordsTotal;
             const re = RegExp(`[${settings.symbol},]`, "g");

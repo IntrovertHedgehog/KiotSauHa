@@ -2,23 +2,25 @@
   width: 1000px;
 }
 
-#productList td:nth-child(1), #productList th:first-child {
-  display: none;
-}
-
-#categoryList td:nth-child(1), #categoryList th:first-child {
+#productList td:first-child,
+#productList th:first-child,
+#productList td:nth-child(9),
+#productList th:nth-child(9),
+#categoryList td:first-child,
+#categoryList th:first-child {
   display: none;
 }
 
 input[type="number"]::-webkit-outer-spin-button,
 input[type="number"]::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
+  -webkit-appearance: none;
+  margin: 0;
 }
+
 input[type="number"] {
-    -moz-appearance: textfield;
+  -moz-appearance: textfield;
 }
 
 #parent {
-  overflow: auto
+  overflow: auto;
 }
