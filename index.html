@@ -507,19 +507,19 @@
                   <form id="saveCustomer" data-parsley-validate>
                       <div class="form-group">
                           <label for="userName">Tên khách hàng*</label>
-                          <input type="text" required="required"  name="name" parsley-trigger="change" placeholder="Enter name" class="form-control" id="userName">
+                          <input type="text" required="required"  name="name" parsley-trigger="change" placeholder="Phan Bội Châu" class="form-control" id="userName">
                       </div>
                       <div class="form-group">
                           <label for="userName">Số điện thoại</label>
-                          <input type="text" name="phone" parsley-trigger="change" placeholder="Enter Phone number" class="form-control" id="phoneNumber">
+                          <input type="text" name="phone" parsley-trigger="change" placeholder="03377251025" class="form-control" id="phoneNumber">
                       </div>
                       <div class="form-group">
                           <label for="userName">Email</label>
-                          <input type="email" name="email" parsley-trigger="change" placeholder="Enter email address" class="form-control" id="emailAddress">
+                          <input type="email" name="email" parsley-trigger="change" placeholder="khachquy@gmail.com" class="form-control" id="emailAddress">
                       </div>
                       <div class="form-group">
                           <label for="userName">Địa chỉ</label>
-                          <input type="text" name="address" parsley-trigger="change" placeholder="Enter address" class="form-control" id="userAddress">
+                          <input type="text" name="address" parsley-trigger="change" placeholder="192 Đoàn Thị Điểm" class="form-control" id="userAddress">
                       </div>
 
                       <input type="submit" class="btn btn-primary btn-block waves-effect waves-light" value="Chấp nhận">
@@ -568,6 +568,14 @@
                         <div class="form-group">
                             <label><input type="checkbox" name="stock" id="stock" style="max-width: 30px; float: left;"> Đừng kiểm tra kho hàng </label>
                         </div>
+                        <div class="form-group">
+                            <label><input type="checkbox" name="hasBestBefore" id="hasBestBefore" style="max-width: 30px; float: left;"> Có hạn sử dụng </label>
+                        </div>
+                        <div class="form-group" id="bestBeforeField" style="display:None">
+                            <label for="bestBefore">Hạn sử dụng</label>
+                            <input type="text" name="bestBefore" id="bestBefore">
+                  </div>
+
                         <div class="form-group">
                             <label for="userName"><span id="rmv_img" class="btn btn-xs btn-warning">Xóa</span> Hình ảnh </label>                      
                             <div id="current_img"></div>

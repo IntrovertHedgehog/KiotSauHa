@@ -77,6 +77,28 @@ const language = {
   lengthMenu: "Hiển thị _MENU_ mục",
 };
 
+const dateRangeLocale = {
+  format: "DD/MM/YYYY",
+  daysOfWeek: ["CN", "T2", "T3", "T4", "T5", "T6", "T7"],
+  monthNames: [
+    "Th.1",
+    "Th.2",
+    "Th.3",
+    "Th.4",
+    "Th.5",
+    "Th.6",
+    "Th.7",
+    "Th.8",
+    "Th.9",
+    "Th.10",
+    "Th.11",
+    "Th.12",
+  ],
+  customRangeLabel: "Ngày tùy chỉnh",
+  applyLabel: "OK",
+  cancelLabel: "Hủy"
+};
+
 function formatInputPrice(e) {
   $(this).calculateChange();
   let val = e.target.value.replace(/\D/g, "");
@@ -150,6 +172,7 @@ $(function() {
           moment().subtract(1, "month").endOf("month"),
         ],
       },
+      locale: dateRangeLocale
     },
     cb,
   );
@@ -159,6 +182,14 @@ $(function() {
   $("#product_price").on("input", formatInputPrice);
 
   cb(start, end);
+
+  $('input[name="bestBefore"]').daterangepicker({
+    singleDatePicker: true,
+    showDropdowns: true,
+    minYear: 1901,
+    maxYear: parseInt(moment().format("YYYY"), 10),
+    locale: dateRangeLocale,
+  });
 });
 
 $.fn.serializeObject = function() {
@@ -410,7 +441,9 @@ function logOnToSystem() {
               $(this).addProductToCart(prod);
               $("#searchBarCode").get(0).reset();
               $("#basic-addon2").empty();
-              $("#basic-addon2").append($("<i>", { class: "glyphicon glyphicon-ok" }));
+              $("#basic-addon2").append(
+                $("<i>", { class: "glyphicon glyphicon-ok" }),
+              );
             } else if (data.quantity < 1) {
               Swal.fire(
                 "Hết hàng",
@@ -1155,6 +1188,8 @@ function logOnToSystem() {
     $("#newProductModal").click(function() {
       skuFocusTarget = "#newSkuCode";
       $("#saveProduct").get(0).reset();
+      $("#bestBefore").val("");
+      $("#bestBeforeField").hide();
       $("#current_img").text("");
     });
 
@@ -1172,6 +1207,15 @@ function logOnToSystem() {
         }
       }
     });
+
+    $("#hasBestBefore").on("change", function(event) {
+      if (event.target.checked) {
+        $("#bestBeforeField").show();
+      } else {
+        $("#bestBefore").val("");
+        $("#bestBeforeField").hide();
+      }
+    })
 
     $("#saveProduct").submit(function(e) {
       e.preventDefault();
@@ -1337,6 +1381,16 @@ function logOnToSystem() {
 
       $("#product_id").val(allProducts[index]._id);
       $("#img").val(allProducts[index].img);
+      $("#hasBestBefore").prop("checked", allProducts[index].hasBestBefore)
+      let bestBeforeQ = $("#bestBefore")
+      if (allProducts[index].hasBestBefore) {
+        bestBeforeQ.show();
+        bestBeforeQ.val(allProducts[index].bestBefore);
+        $("#hasBestBefore").prop("checked", allProducts[index].hasBestBefore)
+      } else {
+        bestBeforeQ.val("");
+        bestBeforeQ.hide();
+      }
 
       if (allProducts[index].img != "") {
         $("#imagename").hide();
