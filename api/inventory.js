@@ -9,6 +9,7 @@ const fs = require("fs");
 const { getConfigHome } = require("platform-folders");
 const { join } = require("upath");
 const { verify_token } = require("../server_util");
+const moment = require("moment");
 
 const dataHome = getConfigHome();
 
@@ -85,6 +86,29 @@ app.post("/product", upload.single("imagename"), function(req, res) {
     }
   }
 
+  let bestBefore = new Map();
+
+  if (req.body.hasBestBefore) {
+    for (let i = 0; i < req.body.bestBefore.length; ++i) {
+      if (req.body.bestBeforeQuant[i] >= 0) {
+        const key = moment(req.body.bestBefore[i], "DD/MM/YYYY").toJSON();
+        if (!bestBefore.has(key)) bestBefore.set(key, 0);
+        bestBefore.set(
+          key,
+          bestBefore.get(key) + parseInt(req.body.bestBeforeQuant[i]),
+        );
+      }
+    }
+  }
+
+  let bestBeforeDates = []
+  let bestBeforeQuant = []
+
+  for (let [k, v] of bestBefore) {
+    bestBeforeDates.push(k)
+    bestBeforeQuant.push(v)
+  }
+
   let Product = {
     _id: parseInt(req.body.id),
     price: parseInt(req.body.price),
@@ -94,7 +118,8 @@ app.post("/product", upload.single("imagename"), function(req, res) {
     skuCode: req.body.skuCode.trim(),
     stock: req.body.stock == "on" ? 0 : 1,
     hasBestBefore: req.body.hasBestBefore == "on" ? 1 : 0,
-    bestBefore: req.body.bestBefore,
+    bestBefore: bestBeforeDates,
+    bestBeforeQuant: bestBeforeQuant,
     hasQuantityDiscount: req.body.hasQuantityDiscount == "on" ? 1 : 0,
     quantityDiscountQuant: parseInt(req.body.quantityDiscountQuant),
     quantityDiscountAmt: parseInt(req.body.quantityDiscountAmt),

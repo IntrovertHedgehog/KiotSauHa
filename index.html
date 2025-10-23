@@ -573,8 +573,22 @@
                             <label><input type="checkbox" name="hasBestBefore" id="hasBestBefore" style="max-width: 30px; float: left;"> Có hạn sử dụng </label>
                         </div>
                         <div class="form-group" id="bestBeforeField" style="display: none">
-                            <label for="bestBefore">Hạn sử dụng</label>
-                            <input type="text" name="bestBefore" id="bestBefore">
+                          <table id="bestBeforeTbl">
+                            <thead>
+                              <th><label for="bestBefore">Hạn sử dụng</label></th>
+                              <th class="align-right"><label for="bestBeforeQuant">Số lượng</label></th>
+                              <th class="small-width"></th>
+                            </thead>
+                            <tbody id="bestBeforeList">
+                              <tr>
+                                <td colspan="3" style="padding-top: 10px; text-align: center;">
+                                  <button id="newBestBefore" type="button" class="btn btn-success waves-effect waves-light">
+                                    <i class="fa fa-plus"></i>
+                                  </button>
+                                </td>
+                              </tr>
+                            </tbody>
+                          </table>
                         </div>
                         <div class="form-group">
                             <label><input type="checkbox" name="hasQuantityDiscount" id="hasQuantityDiscount" style="max-width: 30px; float: left;"> Có giảm giá theo số lượng </label>

@@ -66,6 +66,7 @@ let by_status = 1;
 let skuFocusTarget = "#skuCode"; // "skuCode" | "newSkuCode"
 let justGotIn = true;
 let ambiguousProducts = [];
+let bestBeforeIdx = 0;
 
 const language = {
   search: "Tìm kiếm",
@@ -205,12 +206,35 @@ $(function() {
 
   cb(start, end);
 
-  $("#bestBefore").daterangepicker({
-    singleDatePicker: true,
-    showDropdowns: true,
-    locale: dateRangeLocale,
-  });
+  $("#newBestBefore").on("click", function() {
+    $(this).parent().parent().before(
+      `
+        <tr id="bb-${bestBeforeIdx}">
+          <td><input type="text" name="bestBefore" class="bestBefore"></td>
+          <td class="align-right">
+            <input type="number" name="bestBeforeQuant" class="bestBeforeQuant">
+          </td>
+          <td class="small-width">
+            <button type="button" class="btn btn-danger waves-effect waves-light lessBestBefore" onclick="$(this).removeBestBefore(${bestBeforeIdx})">
+              <i class="fa fa-minus"></i>
+            </button>
+          </td>
+        </tr>
+      `
+    )
+    $(`#bb-${bestBeforeIdx} .bestBefore`).daterangepicker({
+      singleDatePicker: true,
+      showDropdowns: true,
+      locale: dateRangeLocale,
+    });
+
+    bestBeforeIdx++;
+  })
 });
+
+$.fn.removeBestBefore = function(idx) {
+  $(`#bb-${idx}`).remove()
+}
 
 $.fn.serializeObject = function() {
   var o = {};
@@ -1275,17 +1299,33 @@ function logOnToSystem() {
       }
     });
 
-    $("#saveProduct").submit(function(e) {
+    $("#saveProduct").on("submit", function(e) {
       e.preventDefault();
 
       const price_sel = $("#product_price");
       price_sel.val(priceToInt(price_sel.val()));
 
-      const best_before = $("#bestBefore");
-      best_before.val(moment(best_before.val(), "DD/MM/YYYY").toJSON());
-
       const quantityAmt = $("#quantityDiscountAmt");
       quantityAmt.val(priceToInt(quantityAmt.val()));
+
+      const total_quant = parseInt($("#quantity").val())
+      let so_far = 0;
+      for (let i = 0; i < bestBeforeIdx; i++) {
+        const quant_element = $(`#bb-${i} .bestBeforeQuant`)
+        let cur = parseInt(quant_element.val())
+        console.log(cur)
+        if (cur < 0) {
+          $("#bestBeforeTbl").notify("Số lượng không được âm", "error")
+          return;
+        }
+        so_far += cur;
+      }
+
+      if (total_quant != so_far) {
+        $("#bestBeforeTbl").notify("Số lượng phải thống nhất!", "error");
+        return;
+      }
+
 
       $(this).attr("action", api + "inventory/product");
       $(this).attr("method", "POST");

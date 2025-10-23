@@ -24,3 +24,34 @@ input[type="number"] {
 #parent {
   overflow: auto;
 }
+
+#bestBeforeTbl {
+  table-layout: fixed;
+  width: 100%;
+}
+
+#bestBeforeTbl th, #bestBeforeTbl td {
+  padding-left: 5px;
+  padding-right: 5px;
+  padding-top: 3px;
+}
+
+#bestBeforeTbl input[name=bestBefore] {
+  width: 120px;
+}
+
+#bestBeforeTbl input[name=bestBeforeQuant] {
+  width: 80px;
+}
+
+.align-right {
+  text-align: right;
+}
+
+.lessBestBefore {
+  padding: 0px 5px;
+}
+
+.small-width {
+  width: 25px;
+}
