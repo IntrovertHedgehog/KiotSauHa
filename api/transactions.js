@@ -124,10 +124,7 @@ app.post("/new", function(req, res) {
     if (err) res.status(500).send(err);
     else {
       res.sendStatus(200);
-
-      if (newTransaction.paid >= newTransaction.total) {
-        Inventory.decrementInventory(newTransaction.items);
-      }
+      Inventory.decrementInventory(newTransaction.items);
     }
   });
 });

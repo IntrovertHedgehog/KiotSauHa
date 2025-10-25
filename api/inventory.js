@@ -89,8 +89,12 @@ app.post("/product", upload.single("imagename"), function(req, res) {
   let bestBefore = new Map();
 
   if (req.body.hasBestBefore) {
+    if (!Array.isArray(req.body.bestBefore)) {
+      req.body.bestBefore = Array(req.body.bestBefore)
+      req.body.bestBeforeQuant = Array(req.body.bestBeforeQuant)
+    }
     for (let i = 0; i < req.body.bestBefore.length; ++i) {
-      const quant = parseInt(req.body.bestBeforeQuant[i] || "0")
+      const quant = parseInt(req.body.bestBeforeQuant[i] || "0");
       if (quant > 0) {
         const key = moment(req.body.bestBefore[i], "DD/MM/YYYY").toJSON();
         if (!bestBefore.has(key)) bestBefore.set(key, 0);
@@ -102,12 +106,12 @@ app.post("/product", upload.single("imagename"), function(req, res) {
     }
   }
 
-  let bestBeforeDates = []
-  let bestBeforeQuant = []
+  let bestBeforeDates = [];
+  let bestBeforeQuant = [];
 
   for (let [k, v] of bestBefore) {
-    bestBeforeDates.push(k)
-    bestBeforeQuant.push(v)
+    bestBeforeDates.push(k);
+    bestBeforeQuant.push(v);
   }
 
   let Product = {
@@ -196,6 +200,45 @@ app.decrementInventory = function(products) {
           let updatedQuantity =
             parseInt(product.quantity) - parseInt(transactionProduct.quantity);
 
+          // decrement quantity for bestBefore
+          if (product.hasBestBefore) {
+            const bestBeforeMap = new Map();
+            product.bestBefore.forEach((e, i) => {
+              bestBeforeMap.set(e, product.bestBeforeQuant[i]);
+            });
+
+            const keys = [];
+            for (let k of bestBeforeMap.keys()) {
+              keys.push(k);
+            }
+            keys.sort();
+
+            let left = parseInt(transactionProduct.quantity);
+            for (let k of keys) {
+              let cur = bestBeforeMap.get(k);
+              if (cur > left) {
+                bestBeforeMap.set(k, cur - left);
+                left = 0;
+              } else {
+                bestBeforeMap.delete(k);
+                left -= cur;
+              }
+
+              if (left == 0) {
+                break;
+              }
+            }
+
+            product.bestBefore = [];
+            for (let k of bestBeforeMap.keys()) {
+              product.bestBefore.push(k);
+            }
+            product.bestBefore.sort();
+            product.bestBeforeQuant = product.bestBefore.map((k) =>
+              bestBeforeMap.get(k),
+            );
+          }
+
           inventoryDB.update(
             {
               _id: parseInt(product._id),
@@ -203,6 +246,8 @@ app.decrementInventory = function(products) {
             {
               $set: {
                 quantity: updatedQuantity,
+                bestBefore: product.bestBefore,
+                bestBeforeQuant: product.bestBeforeQuant,
               },
             },
             {},

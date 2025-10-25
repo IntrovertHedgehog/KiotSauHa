@@ -67,7 +67,8 @@ let by_status = 1;
 let skuFocusTarget = "#skuCode"; // "skuCode" | "newSkuCode"
 let justGotIn = true;
 let ambiguousProducts = [];
-let bestBeforeIdx = 0;
+let bestBeforeNextIdx = 0;
+let bestBeforeIdx = new Set();
 
 const language = {
   search: "Tìm kiếm",
@@ -208,25 +209,26 @@ $(function() {
   cb(start, end);
 
   $("#newBestBefore").on("click", $(this).addBestBefore);
+  $('[data-toggle="tooltip"]').tooltip({container: "body"})
 });
 
 $.fn.addBestBefore = function() {
-  console.log("adding best before " + bestBeforeIdx);
+  console.log("adding best before " + bestBeforeNextIdx);
   $("#newBestBefore")
     .parent()
     .parent()
     .before(
       `
-        <tr id="bb-${bestBeforeIdx}">
+        <tr id="bb-${bestBeforeNextIdx}">
           <td><input type="text" name="bestBefore" class="bestBefore" value="${moment().format("DD/MM/YYYY")}"></td>
           <td class="align-right">
             <input type="number" name="bestBeforeQuant" class="bestBeforeQuant">
           </td>
           <td class="small-width">
-            <button type="button" class="btn btn-danger waves-effect waves-light lessBestBefore" onclick="$(this).removeBestBefore(${bestBeforeIdx})">
+            <button type="button" class="btn btn-danger waves-effect waves-light lessBestBefore" onclick="$(this).removeBestBefore(${bestBeforeNextIdx})">
               <i class="fa fa-minus"></i>
             </button>
-            <button type="button" class="btn btn-warning waves-effect waves-light equalizeBestBefore" onclick="$(this).equalizeBestBefore(${bestBeforeIdx})"> 
+            <button type="button" class="btn btn-warning waves-effect waves-light equalizeBestBefore" data-toggle="tooltip" data-placement="right" title="Tự động tính số lượng"  onclick="$(this).equalizeBestBefore(${bestBeforeNextIdx})"> 
               <i class="fa fa-equals"></i>
             </button>
             </div>
@@ -234,23 +236,22 @@ $.fn.addBestBefore = function() {
         </tr>
       `,
     );
-  $(`#bb-${bestBeforeIdx} .bestBefore`).daterangepicker({
+  $(`#bb-${bestBeforeNextIdx} .bestBefore`).daterangepicker({
     singleDatePicker: true,
     showDropdowns: true,
     locale: dateRangeLocale,
   });
 
-  return bestBeforeIdx++;
+  $('[data-toggle="tooltip"]').tooltip({container: "body"})
+
+  bestBeforeIdx.add(bestBeforeNextIdx);
+  return bestBeforeNextIdx++;
 };
 
 $.fn.equalizeBestBefore = function(idx) {
-  if ($("#quantity").val() == "") {
-    $("#quantity").notify("Hãy nhập số lượng trước", "warn");
-    return;
-  }
   const total_quant = parseInt($("#quantity").val());
   let so_far = 0;
-  for (let i = 0; i < bestBeforeIdx; i++) {
+  for (let i of bestBeforeIdx) {
     if (i == idx) continue;
     const quant_element = $(`#bb-${i} .bestBeforeQuant`);
     let cur = parseInt(quant_element.val() || "0");
@@ -261,14 +262,24 @@ $.fn.equalizeBestBefore = function(idx) {
     so_far += cur;
   }
 
-  $(`#bb-${idx} .bestBeforeQuant`).val(total_quant - so_far);
-  if (total_quant - so_far < 0) {
-    $("#bestBeforeTbl").notify("Số lượng không được âm", "error");
+  if (idx == -1) {
+    $("#quantity").val(so_far);
+  } else {
+    if ($("#quantity").val() == "") {
+      $("#quantity").notify("Hãy nhập số lượng trước", "warn");
+      return;
+    }
+
+    $(`#bb-${idx} .bestBeforeQuant`).val(total_quant - so_far);
+    if (total_quant - so_far < 0) {
+      $("#bestBeforeTbl").notify("Số lượng không được âm", "error");
+    }
   }
 };
 
 $.fn.removeBestBefore = function(idx) {
   $(`#bb-${idx}`).remove();
+  bestBeforeIdx.delete(idx);
 };
 
 $.fn.serializeObject = function() {
@@ -685,8 +696,10 @@ function logOnToSystem() {
                 "-" +
                 settings.symbol +
                 formatPrice(
-                  Math.floor(data.quantity / data.quantityDiscountQuant) *
-                  data.quantityDiscountAmt,
+                  data.hasQuantityDiscount
+                    ? Math.floor(data.quantity / data.quantityDiscountQuant) *
+                    data.quantityDiscountAmt
+                    : 0,
                 ),
             }).attr("width", "80px"),
             $("<td>")
@@ -1300,8 +1313,13 @@ function logOnToSystem() {
       skuFocusTarget = "#newSkuCode";
       $("#saveProduct").get(0).reset();
       $("#bestBefore").val("");
+      $("#quantityEqualize").hide();
+      $("#quantityContainer").removeClass("input-group");
       $("#bestBeforeField").hide();
       $("#current_img").text("");
+      for (let i of bestBeforeIdx) {
+        $(this).removeBestBefore(i);
+      }
     });
 
     $("#newSkuCode").on("keydown", function(e) {
@@ -1321,9 +1339,13 @@ function logOnToSystem() {
 
     $("#hasBestBefore").on("change", function(event) {
       if (event.target.checked) {
+        $("#quantityEqualize").show();
+        $("#quantityContainer").addClass("input-group");
         $("#bestBeforeField").show();
       } else {
         $("#bestBefore").val("");
+        $("#quantityEqualize").hide();
+        $("#quantityContainer").removeClass("input-group");
         $("#bestBeforeField").hide();
       }
     });
@@ -1345,10 +1367,10 @@ function logOnToSystem() {
 
       const total_quant = parseInt($("#quantity").val());
       let so_far = 0;
-      for (let i = 0; i < bestBeforeIdx; i++) {
+      for (let i of bestBeforeIdx) {
         const quant_element = $(`#bb-${i} .bestBeforeQuant`);
         if (quant_element.val() == "") {
-          quant_element.val(0)
+          quant_element.val(0);
         }
         let cur = parseInt(quant_element.val());
         console.log(cur);
@@ -1513,10 +1535,9 @@ function logOnToSystem() {
     $.fn.editProduct = function(index) {
       $("#Products").modal("hide");
 
-      for (let i = 0; i < bestBeforeIdx; ++i) {
+      for (let i of bestBeforeIdx) {
         $(this).removeBestBefore(i);
       }
-      bestBeforeIdx = 0;
 
       $("#category option")
         .filter(function() {
@@ -1535,6 +1556,8 @@ function logOnToSystem() {
 
       if (allProducts[index].hasBestBefore) {
         $("#hasBestBefore").prop("checked", allProducts[index].hasBestBefore);
+        $("#quantityEqualize").show();
+        $("#quantityContainer").addClass("input-group");
         $("#bestBeforeField").show();
 
         allProducts[index].bestBefore.forEach((bb, idx) => {
@@ -1552,6 +1575,8 @@ function logOnToSystem() {
           $(`#bb-${id} .bestBeforeQuant`).val(qty);
         });
       } else {
+        $("#quantityEqualize").hide();
+        $("#quantityContainer").removeClass("input-group");
         $("#bestBeforeField").hide();
         $("#bestBefore").val("");
       }
@@ -1814,7 +1839,7 @@ function logOnToSystem() {
             <td>${product.stock == 1 ? product.quantity : "N/A"}</td>
             <td>${category.length > 0 ? category[0].name : ""}</td>
             <td>${bestBeforeString}</td>
-            <td>${product.hasBestBefore ? Math.min(...product.bestBefore.map(bb => moment(bb).valueOf())) : Infinity}</td>
+            <td>${product.hasBestBefore ? Math.min(...product.bestBefore.map((bb) => moment(bb).valueOf())) : Infinity}</td>
             <td class="nobr"><span class="btn-group"><button onClick="$(this).editProduct(${index})" class="btn btn-warning btn-sm"><i class="fa fa-edit"></i></button><button onClick="$(this).deleteProduct(${product._id})" class="btn btn-danger btn-sm"><i class="fa fa-trash"></i></button></span></td></tr>`;
       });
 
