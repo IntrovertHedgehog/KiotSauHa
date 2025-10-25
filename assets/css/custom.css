@@ -1,5 +1,9 @@
 .modal-super {
-  width: 1000px;
+  width: 1200px;
+}
+
+.modal-sm {
+  width: 335px;
 }
 
 #productList td:first-child,
@@ -9,6 +13,11 @@
 #categoryList td:first-child,
 #categoryList th:first-child {
   display: none;
+}
+
+#productList td:nth-child(8),
+#productList th:nth-child(8) {
+  width: 90px;
 }
 
 input[type="number"]::-webkit-outer-spin-button,
@@ -48,10 +57,10 @@ input[type="number"] {
   text-align: right;
 }
 
-.lessBestBefore {
+.lessBestBefore, .equalizeBestBefore {
   padding: 0px 5px;
 }
 
 .small-width {
-  width: 25px;
+  width: 62px;
 }

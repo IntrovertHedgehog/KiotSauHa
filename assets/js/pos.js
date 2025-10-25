@@ -42,6 +42,7 @@ let html2canvas = require("html2canvas");
 let JsBarcode = require("jsbarcode");
 let macaddress = require("macaddress");
 const { flags } = require("socket.io/lib/namespace");
+const { availableParallelism } = require("os");
 let categories = [];
 let holdOrderList = [];
 let customerOrderList = [];
@@ -138,7 +139,7 @@ resetAjax();
 
 $.fn.reloadCart = function() {
   let newCart = [];
-  console.log(allProducts)
+  console.log(allProducts);
   for (let item of cart) {
     const prod = allProducts.filter((p) => p._id == item.id)[0];
     newCart.push({
@@ -206,11 +207,18 @@ $(function() {
 
   cb(start, end);
 
-  $("#newBestBefore").on("click", function() {
-    $(this).parent().parent().before(
+  $("#newBestBefore").on("click", $(this).addBestBefore);
+});
+
+$.fn.addBestBefore = function() {
+  console.log("adding best before " + bestBeforeIdx);
+  $("#newBestBefore")
+    .parent()
+    .parent()
+    .before(
       `
         <tr id="bb-${bestBeforeIdx}">
-          <td><input type="text" name="bestBefore" class="bestBefore"></td>
+          <td><input type="text" name="bestBefore" class="bestBefore" value="${moment().format("DD/MM/YYYY")}"></td>
           <td class="align-right">
             <input type="number" name="bestBeforeQuant" class="bestBeforeQuant">
           </td>
@@ -218,23 +226,50 @@ $(function() {
             <button type="button" class="btn btn-danger waves-effect waves-light lessBestBefore" onclick="$(this).removeBestBefore(${bestBeforeIdx})">
               <i class="fa fa-minus"></i>
             </button>
+            <button type="button" class="btn btn-warning waves-effect waves-light equalizeBestBefore" onclick="$(this).equalizeBestBefore(${bestBeforeIdx})"> 
+              <i class="fa fa-equals"></i>
+            </button>
+            </div>
           </td>
         </tr>
-      `
-    )
-    $(`#bb-${bestBeforeIdx} .bestBefore`).daterangepicker({
-      singleDatePicker: true,
-      showDropdowns: true,
-      locale: dateRangeLocale,
-    });
+      `,
+    );
+  $(`#bb-${bestBeforeIdx} .bestBefore`).daterangepicker({
+    singleDatePicker: true,
+    showDropdowns: true,
+    locale: dateRangeLocale,
+  });
 
-    bestBeforeIdx++;
-  })
-});
+  return bestBeforeIdx++;
+};
+
+$.fn.equalizeBestBefore = function(idx) {
+  if ($("#quantity").val() == "") {
+    $("#quantity").notify("Hãy nhập số lượng trước", "warn");
+    return;
+  }
+  const total_quant = parseInt($("#quantity").val());
+  let so_far = 0;
+  for (let i = 0; i < bestBeforeIdx; i++) {
+    if (i == idx) continue;
+    const quant_element = $(`#bb-${i} .bestBeforeQuant`);
+    let cur = parseInt(quant_element.val() || "0");
+    if (cur < 0) {
+      $("#bestBeforeTbl").notify("Số lượng không được âm", "error");
+      return;
+    }
+    so_far += cur;
+  }
+
+  $(`#bb-${idx} .bestBeforeQuant`).val(total_quant - so_far);
+  if (total_quant - so_far < 0) {
+    $("#bestBeforeTbl").notify("Số lượng không được âm", "error");
+  }
+};
 
 $.fn.removeBestBefore = function(idx) {
-  $(`#bb-${idx}`).remove()
-}
+  $(`#bb-${idx}`).remove();
+};
 
 $.fn.serializeObject = function() {
   var o = {};
@@ -587,7 +622,7 @@ function logOnToSystem() {
       let total = 0;
       let grossTotal;
       $("#total").text(cart.length);
-      console.log(cart)
+      console.log(cart);
       $.each(cart, function(index, data) {
         total += data.quantity * data.price;
       });
@@ -646,7 +681,13 @@ function logOnToSystem() {
               text: settings.symbol + formatPrice(data.price * data.quantity),
             }).attr("width", "80px"),
             $("<td>", {
-              text: "-" + settings.symbol + formatPrice(Math.floor(data.quantity / data.quantityDiscountQuant) * data.quantityDiscountAmt),
+              text:
+                "-" +
+                settings.symbol +
+                formatPrice(
+                  Math.floor(data.quantity / data.quantityDiscountQuant) *
+                  data.quantityDiscountAmt,
+                ),
             }).attr("width", "80px"),
             $("<td>")
               .attr("width", "30px")
@@ -1302,20 +1343,17 @@ function logOnToSystem() {
     $("#saveProduct").on("submit", function(e) {
       e.preventDefault();
 
-      const price_sel = $("#product_price");
-      price_sel.val(priceToInt(price_sel.val()));
-
-      const quantityAmt = $("#quantityDiscountAmt");
-      quantityAmt.val(priceToInt(quantityAmt.val()));
-
-      const total_quant = parseInt($("#quantity").val())
+      const total_quant = parseInt($("#quantity").val());
       let so_far = 0;
       for (let i = 0; i < bestBeforeIdx; i++) {
-        const quant_element = $(`#bb-${i} .bestBeforeQuant`)
-        let cur = parseInt(quant_element.val())
-        console.log(cur)
+        const quant_element = $(`#bb-${i} .bestBeforeQuant`);
+        if (quant_element.val() == "") {
+          quant_element.val(0)
+        }
+        let cur = parseInt(quant_element.val());
+        console.log(cur);
         if (cur < 0) {
-          $("#bestBeforeTbl").notify("Số lượng không được âm", "error")
+          $("#bestBeforeTbl").notify("Số lượng không được âm", "error");
           return;
         }
         so_far += cur;
@@ -1326,6 +1364,11 @@ function logOnToSystem() {
         return;
       }
 
+      const price_sel = $("#product_price");
+      price_sel.val(priceToInt(price_sel.val()));
+
+      const quantityAmt = $("#quantityDiscountAmt");
+      quantityAmt.val(priceToInt(quantityAmt.val()));
 
       $(this).attr("action", api + "inventory/product");
       $(this).attr("method", "POST");
@@ -1470,6 +1513,11 @@ function logOnToSystem() {
     $.fn.editProduct = function(index) {
       $("#Products").modal("hide");
 
+      for (let i = 0; i < bestBeforeIdx; ++i) {
+        $(this).removeBestBefore(i);
+      }
+      bestBeforeIdx = 0;
+
       $("#category option")
         .filter(function() {
           return $(this).val() == allProducts[index].category;
@@ -1486,16 +1534,23 @@ function logOnToSystem() {
       $("#hasBestBefore").prop("checked", allProducts[index].hasBestBefore);
 
       if (allProducts[index].hasBestBefore) {
-        $("#bestBeforeField").show();
-        let dateString = moment(allProducts[index].bestBefore).format(
-          "DD/MM/YYYY",
-        );
-        $("#bestBefore")
-          .val(dateString)
-          .data("daterangepicker")
-          .setStartDate(dateString);
-        $("#bestBefore").data("daterangepicker").setEndDate(dateString);
         $("#hasBestBefore").prop("checked", allProducts[index].hasBestBefore);
+        $("#bestBeforeField").show();
+
+        allProducts[index].bestBefore.forEach((bb, idx) => {
+          console.log(bb);
+          const dateString = moment(bb).format("DD/MM/YYYY");
+          const qty = allProducts[index].bestBeforeQuant[idx];
+          const id = $(this).addBestBefore();
+          $(`#bb-${id} .bestBefore`)
+            .val(dateString)
+            .data("daterangepicker")
+            .setStartDate(dateString);
+          $(`#bb-${id} .bestBefore`)
+            .data("daterangepicker")
+            .setEndDate(dateString);
+          $(`#bb-${id} .bestBeforeQuant`).val(qty);
+        });
       } else {
         $("#bestBeforeField").hide();
         $("#bestBefore").val("");
@@ -1540,7 +1595,9 @@ function logOnToSystem() {
         for (let i = 0; i < allProducts.length; ++i) {
           if (
             allProducts[i].hasBestBefore &&
-            moment(allProducts[i].bestBefore).valueOf() <= thres
+            allProducts[i].bestBefore
+              .map((b) => moment(b).valueOf() < thres)
+              .reduce((a, b) => a || b, false)
           ) {
             filteredIndices.push(i);
           }
@@ -1736,6 +1793,15 @@ function logOnToSystem() {
           return category._id == product.category;
         });
 
+        const bestBeforeString = product.bestBefore
+          .map(
+            (bb, index) =>
+              moment(bb).format("DD/MM/YYYY") +
+              " x " +
+              product.bestBeforeQuant[index],
+          )
+          .join("<br>");
+
         product_list +=
           `<tr>
             <td>${product.skuCode} ${product.name.normalize("NFKD").replace(/[\u0300-\u036f]/g, "")}</td>
@@ -1747,8 +1813,8 @@ function logOnToSystem() {
             <td>${settings.symbol}${product.price}</td>
             <td>${product.stock == 1 ? product.quantity : "N/A"}</td>
             <td>${category.length > 0 ? category[0].name : ""}</td>
-            <td>${product.hasBestBefore ? moment(product.bestBefore).format("DD/MM/YYYY") : ""}</td>
-            <td>${product.hasBestBefore ? moment(product.bestBefore).valueOf() : Infinity}</td>
+            <td>${bestBeforeString}</td>
+            <td>${product.hasBestBefore ? Math.min(...product.bestBefore.map(bb => moment(bb).valueOf())) : Infinity}</td>
             <td class="nobr"><span class="btn-group"><button onClick="$(this).editProduct(${index})" class="btn btn-warning btn-sm"><i class="fa fa-edit"></i></button><button onClick="$(this).deleteProduct(${product._id})" class="btn btn-danger btn-sm"><i class="fa fa-trash"></i></button></span></td></tr>`;
       });
 

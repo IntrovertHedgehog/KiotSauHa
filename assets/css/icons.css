@@ -485,6 +485,13 @@
 .fa-plus:before {
   content: "\f067";
 }
+
+.fa-equals:before {
+  content: "=";
+  font-weight: 1000;
+  font-size: large;
+}
+
 .fa-minus:before {
   content: "\f068";
 }

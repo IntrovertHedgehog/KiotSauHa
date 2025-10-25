@@ -90,7 +90,8 @@ app.post("/product", upload.single("imagename"), function(req, res) {
 
   if (req.body.hasBestBefore) {
     for (let i = 0; i < req.body.bestBefore.length; ++i) {
-      if (req.body.bestBeforeQuant[i] >= 0) {
+      const quant = parseInt(req.body.bestBeforeQuant[i] || "0")
+      if (quant > 0) {
         const key = moment(req.body.bestBefore[i], "DD/MM/YYYY").toJSON();
         if (!bestBefore.has(key)) bestBefore.set(key, 0);
         bestBefore.set(
