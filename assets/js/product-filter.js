@@ -111,8 +111,8 @@ $(document).ready(function() {
 
   $.fn.calculateChange = function() {
     var change =
-      $(this).priceToInt($("#payment").val()) - 
-      $(this).priceToInt($("#payablePrice").val())
+      $(this).priceToInt($("#payment").val()) -
+      $(this).priceToInt($("#payablePrice").val());
     if (change > 0) {
       $("#change").text($(this).formatPrice(change));
     } else {
@@ -123,5 +123,18 @@ $(document).ready(function() {
     } else {
       $("#confirmPayment").hide();
     }
+  };
+
+  $.fn.delDigits = function() {
+    $("#payment").val(
+      $(this).formatPrice(
+        $(this).priceToInt(
+          $("#payment")
+            .val()
+            .substr(0, $("#payment").val().length - 1),
+        ),
+      ),
+    );
+    $(this).calculateChange();
   };
 });

@@ -456,7 +456,7 @@
                                   <br>
                                   <div class="row">
                                       <div class="col-md-3">
-                                          <button onclick="$('#payment').val($('#payment').val().substr(0,$('#payment').val().length -1));$(this).calculateChange();" class="btn btn-success btn-lg btn-block">⌫</button>
+                                          <button onclick="$(this).delDigits();" class="btn btn-success btn-lg btn-block">⌫</button>
                                       </div>
                                       <div class="col-md-3">
                                           <button onclick="$(this).go(0,false);" class="btn btn-success btn-lg btn-block">0</button>
