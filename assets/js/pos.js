@@ -140,13 +140,13 @@ resetAjax();
 
 $.fn.reloadCart = function() {
   let newCart = [];
-  console.log(allProducts);
   for (let item of cart) {
     const prod = allProducts.filter((p) => p._id == item.id)[0];
     newCart.push({
       id: prod._id,
       product_name: prod.name,
       skuCode: prod.skuCode,
+      price_purchase: priceToInt(prod.price_purchase),
       price: priceToInt(prod.price),
       hasQuantityDiscount: prod.hasQuantityDiscount,
       quantityDiscountQuant: prod.quantityDiscountQuant,
@@ -203,6 +203,8 @@ $(function() {
   );
 
   $("#inputDiscount").on("input", formatInputPrice);
+
+  $("#price_purchase").on("input", formatInputPrice);
 
   $("#product_price").on("input", formatInputPrice);
 
@@ -406,6 +408,7 @@ function logOnToSystem() {
     function loadProducts() {
       $.get(api + "inventory/products", function(data) {
         data.forEach((item) => {
+          item.price_purchase = formatPrice(item.price_purchase);
           item.price = formatPrice(item.price);
         });
 
@@ -587,6 +590,7 @@ function logOnToSystem() {
         id: data._id,
         product_name: data.name,
         skuCode: data.skuCode,
+        price_purchase: data.price_purchase,
         price: data.price,
         hasQuantityDiscount: data.hasQuantityDiscount,
         quantityDiscountQuant: data.quantityDiscountQuant,
@@ -1133,6 +1137,7 @@ function logOnToSystem() {
             id: product.id,
             product_name: product.product_name,
             skuCode: product.skuCode,
+            price_purchase: product.price_purchase,
             price: product.price,
             quantity: product.quantity,
           };
@@ -1156,6 +1161,7 @@ function logOnToSystem() {
             id: product.id,
             product_name: product.product_name,
             skuCode: product.skuCode,
+            price_purchase: product.price_purchase,
             price: product.price,
             quantity: product.quantity,
           };
@@ -1367,6 +1373,12 @@ function logOnToSystem() {
 
       const total_quant = parseInt($("#quantity").val());
       let so_far = 0;
+
+      if (bestBeforeIdx.size == 0) {
+        $("#bestBeforeTbl").notify("Không được để trống", "error");
+        return;
+      }
+
       for (let i of bestBeforeIdx) {
         const quant_element = $(`#bb-${i} .bestBeforeQuant`);
         if (quant_element.val() == "") {
@@ -1385,6 +1397,10 @@ function logOnToSystem() {
         $("#bestBeforeTbl").notify("Số lượng phải thống nhất!", "error");
         return;
       }
+
+
+      const price_purchase = $("#price_purchase");
+      price_purchase.val(priceToInt(price_purchase.val()));
 
       const price_sel = $("#product_price");
       price_sel.val(priceToInt(price_sel.val()));
@@ -1547,6 +1563,7 @@ function logOnToSystem() {
 
       $("#newSkuCode").val(allProducts[index].skuCode);
       $("#productName").val(allProducts[index].name);
+      $("#price_purchase").val(allProducts[index].price_purchase);
       $("#product_price").val(allProducts[index].price);
       $("#quantity").val(allProducts[index].quantity);
 
@@ -1835,6 +1852,7 @@ function logOnToSystem() {
           `"></td>
             <td><img style="max-height: 50px; max-width: 50px; border: 1px solid #ddd;" src="${product.img == "" ? "./assets/images/default.jpg" : img_path + product.img}" id="product_img"></td>
             <td>${product.name}</td>
+            <td>${settings.symbol}${product.price_purchase}</td>
             <td>${settings.symbol}${product.price}</td>
             <td>${product.stock == 1 ? product.quantity : "N/A"}</td>
             <td>${category.length > 0 ? category[0].name : ""}</td>
@@ -1864,6 +1882,7 @@ function logOnToSystem() {
         paging: true,
         language,
         columns: [
+          null,
           null,
           null,
           null,
@@ -2182,6 +2201,7 @@ function loadTransactions() {
   let tills = [];
   let users = [];
   let sales = 0;
+  let cost = 0;
   let transact = 0;
   let unique = 0;
 
@@ -2206,6 +2226,8 @@ function loadTransactions() {
 
       trans.items.forEach((item) => {
         sold_items.push(item);
+        const item_cost = item.price_purchase ? item.price_purchase : item.price
+        cost += item.quantity * item_cost
       });
 
       if (!tills.includes(trans.till)) {
@@ -2232,27 +2254,23 @@ function loadTransactions() {
 
     const result = {};
 
-    for (const { product_name, price, quantity, id } of sold_items) {
+    for (const item of sold_items) {
+      const id = item.id;
       if (!result[id]) result[id] = [];
-      result[id].push({ id, price, quantity, product_name });
+      result[id].push(item);
     }
 
     for (let id in result) {
-      let price = 0;
       let quantity = 0;
-      let name = 0;
 
-      result[id].forEach((i) => {
-        name = i.product_name;
-        price = i.price;
-        quantity += i.quantity;
-      });
+      quantity = result[id].reduce((a, b) => a + b.quantity, 0);
+      const item_sales = result[id].reduce((a, b) => a + b.quantity * b.price - (b.hasQuantityDiscount ? Math.floor(b.quantity / b.quantityDiscountQuant) * b.quantityDiscountAmt : 0), 0)
+      const item_cost = result[id][0].price_purchase * quantity;
+
+      console.log(result[id])
 
       sold.push({
-        id: id,
-        product: name,
-        qty: quantity,
-        price: price,
+        ...result[id][0], quantity: quantity, sales: item_sales, profits: item_sales - item_cost
       });
     }
 
@@ -2274,6 +2292,7 @@ function loadTransactions() {
     justGotIn = false;
 
     $("#total_sales #counter").text(settings.symbol + formatPrice(sales));
+    $("#total_profits #counter").text(settings.symbol + formatPrice(sales - cost));
     $("#total_transactions #counter").text(transact);
     $("#transaction_list").html(transaction_list);
     $("#transactionList").DataTable({
@@ -2327,18 +2346,21 @@ function loadSoldProducts() {
   let items = 0;
   $("#product_sales").empty();
 
+  console.log(sold)
+
   sold.forEach((item, index) => {
-    items += item.qty;
+    items += item.quantity;
 
     let product = allProducts.filter(function(selected) {
       return selected._id == item.id;
     });
 
     sold_list += `<tr>
-            <td>${item.product}</td>
-            <td>${item.qty}</td>
-            <td>${product.length > 0 ? product[0].stock && product[0].quantity : 0}</td>
-            <td>${settings.symbol + formatPrice(item.qty * parseInt(item.price))}</td>
+            <td>${item.product_name}</td>
+            <td>${item.quantity}</td>
+            <td>${product[0].stock && product[0].quantity}</td>
+            <td>${settings.symbol + formatPrice(item.sales)}</td>
+            <td>${settings.symbol + formatPrice(item.profits)}</td>
             </tr>`;
   });
 

@@ -148,7 +148,8 @@
                                                         <th>Tên</th>
                                                         <th>Đã bán</th>
                                                         <th>Tồn kho</th> 
-                                                        <th>Doanh thu</th>                                                                                                           
+                                                        <th>Doanh thu</th>
+                                                        <th>Lợi nhuận</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody id="product_sales"></tbody>
@@ -158,8 +159,13 @@
                                             <h4>Tổng tiền</h4>
                                             <hr>
                                     
-                                            <div id="total_sales" class="btn-success">
+                                            <div id="total_sales" class="btn-primary">
                                                 <h5>Doanh thu</h5>
+                                                <div id="counter">0</div>
+                                            </div>
+
+                                            <div id="total_profits" class="btn-success">
+                                                <h5>Lợi nhuận</h5>
                                                 <div id="counter">0</div>
                                             </div>
                                        
@@ -559,8 +565,12 @@
                             <input type="text" required="required"  name="name" parsley-trigger="change" placeholder="Nhập tên mặt hàng" class="form-control" id="productName">
                         </div>
                         <div class="form-group">
-                            <label for="userName">Giá</label>
-                            <input type="text" required="required" name="price" placeholder="Giá" class="form-control" id="product_price">
+                            <label for="userName">Giá nhập</label>
+                            <input type="text" required="required" name="price_purchase" placeholder="Giá nhập" class="form-control" id="price_purchase">
+                        </div>
+                        <div class="form-group">
+                            <label for="userName">Giá bán</label>
+                            <input type="text" required="required" name="price" placeholder="Giá bán" class="form-control" id="product_price">
                         </div>
                         <div class="form-group">
                             <label for="userName">Số lượng</label>
@@ -670,8 +680,9 @@
                                     <th>searched text</th>
                                     <th>Mã vạch</th>
                                     <th>Mặt hàng</th>
-                                    <th>Tên</th>                                      
-                                    <th>Giá</th>
+                                    <th>Tên</th>
+                                    <th>Giá nhập</th>
+                                    <th>Giá bán</th>
                                     <th>Số lượng</th>
                                     <th>Thể loại</th>
                                     <th>Hạn sử dụng</th>

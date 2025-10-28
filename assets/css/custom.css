@@ -8,8 +8,8 @@
 
 #productList td:first-child,
 #productList th:first-child,
-#productList td:nth-child(9),
-#productList th:nth-child(9),
+#productList td:nth-child(10),
+#productList th:nth-child(10),
 #categoryList td:first-child,
 #categoryList th:first-child {
   display: none;

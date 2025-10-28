@@ -72,6 +72,7 @@ Check out the [Offline Invoicing](https://github.com/tngoman/Offline_Invoicing) 
   - [x] tiered discount
     - [x] one tier
   - [x] when scanned product with multiple skuCode, pop out to reduce 
+  - [ ] with product cost
 - [x] handle no data:
   - [x] reset all visible fields
   - [x] notify at closest element

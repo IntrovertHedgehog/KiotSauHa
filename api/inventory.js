@@ -117,6 +117,7 @@ app.post("/product", upload.single("imagename"), function(req, res) {
   let Product = {
     _id: parseInt(req.body.id),
     price: parseInt(req.body.price),
+    price_purchase: parseInt(req.body.price_purchase),
     category: req.body.category,
     quantity: req.body.quantity == "" ? 0 : parseInt(req.body.quantity),
     name: req.body.name,
