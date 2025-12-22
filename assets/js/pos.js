@@ -28,7 +28,7 @@ let port = "8001";
 let moment = require("moment");
 let Swal = require("sweetalert2");
 let { ipcRenderer } = require("electron");
-let dotInterval = setInterval(function() {
+let dotInterval = setInterval(function () {
   $(".dot").text(".");
 }, 3000);
 let Store = require("electron-store");
@@ -138,7 +138,7 @@ function resetAjax() {
 
 resetAjax();
 
-$.fn.reloadCart = function() {
+$.fn.reloadCart = function () {
   let newCart = [];
   for (let item of cart) {
     const prod = allProducts.filter((p) => p._id == item.id)[0];
@@ -159,7 +159,7 @@ $.fn.reloadCart = function() {
   $(this).renderTable(cart);
 };
 
-$(function() {
+$(function () {
   function cb(start, end) {
     $("#reportrange span").html(
       start.format("DD/MM/YYYY") + "  -  " + end.format("DD/MM/YYYY"),
@@ -211,10 +211,10 @@ $(function() {
   cb(start, end);
 
   $("#newBestBefore").on("click", $(this).addBestBefore);
-  $('[data-toggle="tooltip"]').tooltip({container: "body"})
+  $('[data-toggle="tooltip"]').tooltip({ container: "body" });
 });
 
-$.fn.addBestBefore = function() {
+$.fn.addBestBefore = function () {
   console.log("adding best before " + bestBeforeNextIdx);
   $("#newBestBefore")
     .parent()
@@ -230,7 +230,7 @@ $.fn.addBestBefore = function() {
             <button type="button" class="btn btn-danger waves-effect waves-light lessBestBefore" onclick="$(this).removeBestBefore(${bestBeforeNextIdx})">
               <i class="fa fa-minus"></i>
             </button>
-            <button type="button" class="btn btn-warning waves-effect waves-light equalizeBestBefore" data-toggle="tooltip" data-placement="right" title="Tự động tính số lượng"  onclick="$(this).equalizeBestBefore(${bestBeforeNextIdx})"> 
+            <button type="button" class="btn btn-warning waves-effect waves-light equalizeBestBefore" data-toggle="tooltip" data-placement="right" title="Tự động tính số lượng"  onclick="$(this).equalizeBestBefore(${bestBeforeNextIdx})">
               <i class="fa fa-equals"></i>
             </button>
             </div>
@@ -244,13 +244,13 @@ $.fn.addBestBefore = function() {
     locale: dateRangeLocale,
   });
 
-  $('[data-toggle="tooltip"]').tooltip({container: "body"})
+  $('[data-toggle="tooltip"]').tooltip({ container: "body" });
 
   bestBeforeIdx.add(bestBeforeNextIdx);
   return bestBeforeNextIdx++;
 };
 
-$.fn.equalizeBestBefore = function(idx) {
+$.fn.equalizeBestBefore = function (idx) {
   const total_quant = parseInt($("#quantity").val());
   let so_far = 0;
   for (let i of bestBeforeIdx) {
@@ -279,15 +279,15 @@ $.fn.equalizeBestBefore = function(idx) {
   }
 };
 
-$.fn.removeBestBefore = function(idx) {
+$.fn.removeBestBefore = function (idx) {
   $(`#bb-${idx}`).remove();
   bestBeforeIdx.delete(idx);
 };
 
-$.fn.serializeObject = function() {
+$.fn.serializeObject = function () {
   var o = {};
   var a = this.serializeArray();
-  $.each(a, function() {
+  $.each(a, function () {
     if (o[this.name]) {
       if (!o[this.name].push) {
         o[this.name] = [o[this.name]];
@@ -304,7 +304,7 @@ auth = storage.get("auth");
 user = storage.get("user");
 
 if (auth == undefined) {
-  $.get(api + "users/check/", function(data) { });
+  $.get(api + "users/check/", function (data) {});
   $("#loading").show();
   authenticate();
 } else {
@@ -313,15 +313,15 @@ if (auth == undefined) {
     headers: {
       authorization: auth.token,
     },
-    success: function(data) {
+    success: function (data) {
       console.log(data);
       resetAjax();
       logOnToSystem();
     },
-    error: function(err) {
+    error: function (err) {
       // force login if expire
       console.error(err);
-      $.get(api + "users/check/", function(data) { });
+      $.get(api + "users/check/", function (data) {});
       $("#loading").show();
       authenticate();
       $.notify(err.responseText, "error");
@@ -332,7 +332,7 @@ if (auth == undefined) {
 function logOnToSystem() {
   $("#loading").show();
 
-  setTimeout(function() {
+  setTimeout(function () {
     $("#loading").hide();
   }, 2000);
 
@@ -345,23 +345,23 @@ function logOnToSystem() {
     }
   }
 
-  $.get(api + "users/user/" + user._id, function(data) {
+  $.get(api + "users/user/" + user._id, function (data) {
     user = data;
     $("#loggedin-user").text(user.fullname);
   });
 
-  $.get(api + "settings/get", function(data) {
+  $.get(api + "settings/get", function (data) {
     settings = data.settings;
     $("#gross_price").text(`${settings.symbol}0`);
     $("#price").text(`${settings.symbol}0`);
     $(".currency").text(`  ${settings.symbol}`);
   });
 
-  $.get(api + "users/all", function(users) {
+  $.get(api + "users/all", function (users) {
     allUsers = [...users];
   });
 
-  $(document).ready(function() {
+  $(document).ready(function () {
     $(".loading").hide();
 
     loadCategories();
@@ -372,7 +372,7 @@ function logOnToSystem() {
       $("#price_curr, #payment_curr, #change_curr").text(settings.symbol);
     }
 
-    setTimeout(function() {
+    setTimeout(function () {
       if (settings == undefined && auth != undefined) {
         $("#settingsModal").modal("show");
       } else {
@@ -381,8 +381,8 @@ function logOnToSystem() {
       }
     }, 1500);
 
-    $("#settingsModal").on("hide.bs.modal", function() {
-      setTimeout(function() {
+    $("#settingsModal").on("hide.bs.modal", function () {
+      setTimeout(function () {
         if (settings == undefined && auth != undefined) {
           $("#settingsModal").modal("show");
         }
@@ -406,7 +406,7 @@ function logOnToSystem() {
     }
 
     function loadProducts() {
-      $.get(api + "inventory/products", function(data) {
+      $.get(api + "inventory/products", function (data) {
         data.forEach((item) => {
           item.price_purchase = formatPrice(item.price_purchase);
           item.price = formatPrice(item.price);
@@ -429,11 +429,11 @@ function logOnToSystem() {
 
           let item_info = `<div class="col-lg-2 box ${item.category}"
                                 onclick="$(this).addToCart(${item._id}, ${item.quantity}, ${item.stock})">
-                            <div class="widget-panel widget-style-2 ">                    
+                            <div class="widget-panel widget-style-2 ">
                             <div hidden class="search-term">${item.name.normalize("NFKD").replace(/[\u0300-\u036f]/g, "")}</div>
-                            <div id="image"><img src="${item.img == "" ? "./assets/images/default.jpg" : img_path + item.img}" id="product_img" alt=""></div>                    
+                            <div id="image"><img src="${item.img == "" ? "./assets/images/default.jpg" : img_path + item.img}" id="product_img" alt=""></div>
                                         <div class="text-muted m-t-5 text-center">
-                                        <div class="name" id="product_name">${item.name}</div> 
+                                        <div class="name" id="product_name">${item.name}</div>
                                         <span class="skuCode" style="display:none">${item.skuCode}</span>
                                         <span class="stock">SL </span><span class="count">${item.stock == 1 ? item.quantity : "N/A"}</span></div>
                                         <sp class="text-success text-center"><b data-plugin="counterup">${settings.symbol + item.price}</b> </sp>
@@ -443,7 +443,7 @@ function logOnToSystem() {
         });
 
         categories.forEach((category) => {
-          let c = allCategories.filter(function(ctg) {
+          let c = allCategories.filter(function (ctg) {
             return ctg._id == category;
           });
 
@@ -455,7 +455,7 @@ function logOnToSystem() {
     }
 
     function loadCategories() {
-      $.get(api + "categories/all", function(data) {
+      $.get(api + "categories/all", function (data) {
         allCategories = data;
         loadCategoryList();
         $("#category").html(`<option value="0">Chọn</option>`);
@@ -468,7 +468,7 @@ function logOnToSystem() {
     }
 
     function loadCustomers() {
-      $.get(api + "customers/all", function(customers) {
+      $.get(api + "customers/all", function (customers) {
         $("#customer").html(
           `<option value="0" selected="selected">Khách lạ</option>`,
         );
@@ -482,17 +482,17 @@ function logOnToSystem() {
       });
     }
 
-    $.fn.addToCart = function(id, count, stock) {
+    $.fn.addToCart = function (id, count, stock) {
       if (stock == 1) {
         if (count > 0) {
-          $.get(api + "inventory/product/" + id, function(data) {
+          $.get(api + "inventory/product/" + id, function (data) {
             $(this).addProductToCart(data);
           });
         } else {
           Swal.fire("Hết hàng", "Mặt hàng này hiện đã hết trong kho", "info");
         }
       } else {
-        $.get(api + "inventory/product/" + id, function(data) {
+        $.get(api + "inventory/product/" + id, function (data) {
           $(this).addProductToCart(data);
         });
       }
@@ -508,17 +508,17 @@ function logOnToSystem() {
       };
 
       $.ajax({
-        url: api + "inventory/product/skuCode",
+        url: api + "inventory/product/sku",
         type: "POST",
         data: JSON.stringify(req),
         processData: false,
-        success: function(data) {
+        success: function (data) {
           if (data.length == 0) {
             Swal.fire(
               "Không tìm thấy",
               "<b>" +
-              $("#skuCode").val() +
-              "</b> không phải là mã vạch hợp lệ!",
+                $("#skuCode").val() +
+                "</b> không phải là mã vạch hợp lệ!",
               "warning",
             );
 
@@ -552,7 +552,7 @@ function logOnToSystem() {
             $(this).pickAmbiguousProduct();
           }
         },
-        error: function(data) {
+        error: function (data) {
           if (data.status === 422) {
             $(this).showValidationError(data);
             $("#basic-addon2").append(
@@ -574,18 +574,18 @@ function logOnToSystem() {
       });
     }
 
-    $("#searchBarCode").on("submit", function(e) {
+    $("#searchBarCode").on("submit", function (e) {
       barcodeSearch(e);
     });
 
-    $("body").on("click", "#jq-keyboard button", function(e) {
+    $("body").on("click", "#jq-keyboard button", function (e) {
       let pressed = $(this)[0].className.split(" ");
       if ($("#skuCode").val() != "" && pressed[2] == "enter") {
         barcodeSearch(e);
       }
     });
 
-    $.fn.addProductToCart = function(data) {
+    $.fn.addProductToCart = function (data) {
       item = {
         id: data._id,
         product_name: data.name,
@@ -606,9 +606,9 @@ function logOnToSystem() {
       }
     };
 
-    $.fn.calculateDiscount = function() {
+    $.fn.calculateDiscount = function () {
       let totalDiscount = 0;
-      $.each(cart, function(index, item) {
+      $.each(cart, function (index, item) {
         if (item.hasQuantityDiscount) {
           totalDiscount +=
             item.quantityDiscountAmt *
@@ -618,9 +618,9 @@ function logOnToSystem() {
       $("#inputDiscount").val(formatPrice(totalDiscount));
     };
 
-    $.fn.isExist = function(data) {
+    $.fn.isExist = function (data) {
       let toReturn = false;
-      $.each(cart, function(index, value) {
+      $.each(cart, function (index, value) {
         if (value.id == data.id) {
           $(this).setIndex(index);
           toReturn = true;
@@ -629,16 +629,16 @@ function logOnToSystem() {
       return toReturn;
     };
 
-    $.fn.setIndex = function(value) {
+    $.fn.setIndex = function (value) {
       index = value;
     };
 
-    $.fn.calculateCart = function() {
+    $.fn.calculateCart = function () {
       let total = 0;
       let grossTotal;
       $("#total").text(cart.length);
       console.log(cart);
-      $.each(cart, function(index, data) {
+      $.each(cart, function (index, data) {
         total += data.quantity * data.price;
       });
       total = total - priceToInt($("#inputDiscount").val());
@@ -659,11 +659,11 @@ function logOnToSystem() {
       $("#payablePrice").val(formatPrice(orderTotal));
     };
 
-    $.fn.renderTable = function(cartList) {
+    $.fn.renderTable = function (cartList) {
       $(this).calculateDiscount();
       $("#cartTable > tbody").empty();
       $(this).calculateCart();
-      $.each(cartList, function(index, data) {
+      $.each(cartList, function (index, data) {
         $("#cartTable > tbody").append(
           $("<tr>").append(
             $("<td>", { text: index + 1 }).attr("width", "30px"),
@@ -702,7 +702,7 @@ function logOnToSystem() {
                 formatPrice(
                   data.hasQuantityDiscount
                     ? Math.floor(data.quantity / data.quantityDiscountQuant) *
-                    data.quantityDiscountAmt
+                        data.quantityDiscountAmt
                     : 0,
                 ),
             }).attr("width", "80px"),
@@ -719,15 +719,15 @@ function logOnToSystem() {
       });
     };
 
-    $.fn.deleteFromCart = function(index) {
+    $.fn.deleteFromCart = function (index) {
       cart.splice(index, 1);
       $(this).renderTable(cart);
     };
 
-    $.fn.qtIncrement = function(i) {
+    $.fn.qtIncrement = function (i) {
       item = cart[i];
 
-      let product = allProducts.filter(function(selected) {
+      let product = allProducts.filter(function (selected) {
         return selected._id == parseInt(item.id);
       });
 
@@ -748,7 +748,7 @@ function logOnToSystem() {
       }
     };
 
-    $.fn.qtDecrement = function(i) {
+    $.fn.qtDecrement = function (i) {
       if (item.quantity > 1) {
         item = cart[i];
         item.quantity -= 1;
@@ -757,14 +757,14 @@ function logOnToSystem() {
       $(this).calculateDiscount();
     };
 
-    $.fn.qtInput = function(i) {
+    $.fn.qtInput = function (i) {
       item = cart[i];
       item.quantity = parseInt($(this).val());
       $(this).calculateDiscount();
       $(this).renderTable(cart);
     };
 
-    $.fn.cancelOrder = function() {
+    $.fn.cancelOrder = function () {
       $("#inputDiscount").val("");
       if (cart.length > 0) {
         Swal.fire({
@@ -793,7 +793,7 @@ function logOnToSystem() {
       $(this).calculateCart();
     };
 
-    $("#payButton").on("click", function() {
+    $("#payButton").on("click", function () {
       if (cart.length != 0) {
         paymentType = 1;
         $("#paymentModel").modal("toggle");
@@ -802,7 +802,7 @@ function logOnToSystem() {
       }
     });
 
-    $("#hold").on("click", function() {
+    $("#hold").on("click", function () {
       if (cart.length != 0) {
         $("#dueModal").modal("toggle");
       } else {
@@ -814,7 +814,7 @@ function logOnToSystem() {
       alert("print job complete");
     }
 
-    $.fn.submitDueOrder = function(status) {
+    $.fn.submitDueOrder = function (status) {
       let items = "";
       let payment = 0;
 
@@ -904,14 +904,14 @@ function logOnToSystem() {
         method = "POST";
       }
 
-      receipt = `<div style="font-size: 10px;">                            
+      receipt = `<div style="font-size: 10px;">
         <p style="text-align: center;">
         ${settings.img == "" ? settings.img : '<img style="max-width: 50px;max-width: 100px;" src ="' + img_path + settings.img + '" /><br>'}
             <span style="font-size: 22px;">${settings.store}</span> <br>
             ${settings.address_one} <br>
             ${settings.address_two} <br>
-            ${settings.contact != "" ? "Số điện thoại: " + settings.contact + "<br>" : ""} 
-            ${settings.tax != "" ? "Mã số thuế" + settings.tax + "<br>" : ""} 
+            ${settings.contact != "" ? "Số điện thoại: " + settings.contact + "<br>" : ""}
+            ${settings.tax != "" ? "Mã số thuế" + settings.tax + "<br>" : ""}
         </p>
         <hr>
         <left>
@@ -934,9 +934,9 @@ function logOnToSystem() {
             </tr>
             </thead>
             <tbody>
-            ${items}                
-     
-            <tr>                        
+            ${items}
+
+            <tr>
                 <td><b>Tổng</b></td>
                 <td>:</td>
                 <td><b>${settings.symbol}${formatPrice(subTotal)}</b></td>
@@ -946,9 +946,9 @@ function logOnToSystem() {
                 <td>:</td>
                 <td>${discount > 0 ? settings.symbol + formatPrice(discount) : ""}</td>
             </tr>
-            
+
             ${tax_row}
-        
+
             <tr>
                 <td><h3>Thành tiền</h3></td>
                 <td><h3>:</h3></td>
@@ -1007,7 +1007,7 @@ function logOnToSystem() {
         type: method,
         data: JSON.stringify(data),
         processData: false,
-        success: function(data) {
+        success: function (data) {
           cart = [];
           $("#inputDiscount").val("");
           $("#viewTransaction").html("");
@@ -1022,7 +1022,7 @@ function logOnToSystem() {
           $(this).getCustomerOrders();
           $(this).renderTable(cart);
         },
-        error: function(data) {
+        error: function (data) {
           $(".loading").hide();
           $("#dueModal").modal("toggle");
           Swal(
@@ -1037,15 +1037,15 @@ function logOnToSystem() {
       $("#payment").val("");
     };
 
-    $.get(api + "on-hold", function(data) {
+    $.get(api + "on-hold", function (data) {
       holdOrderList = data;
       holdOrderlocation.empty();
       clearInterval(dotInterval);
       $(this).randerHoldOrders(holdOrderList, holdOrderlocation, 1);
     });
 
-    $.fn.getHoldOrders = function() {
-      $.get(api + "on-hold", function(data) {
+    $.fn.getHoldOrders = function () {
+      $.get(api + "on-hold", function (data) {
         holdOrderList = data;
         clearInterval(dotInterval);
         holdOrderlocation.empty();
@@ -1053,8 +1053,8 @@ function logOnToSystem() {
       });
     };
 
-    $.fn.randerHoldOrders = function(data, renderLocation, orderType) {
-      $.each(data, function(index, order) {
+    $.fn.randerHoldOrders = function (data, renderLocation, orderType) {
+      $.each(data, function (index, order) {
         $(this).calculatePrice(order);
         renderLocation.append(
           $("<div>", {
@@ -1104,9 +1104,9 @@ function logOnToSystem() {
       });
     };
 
-    $.fn.calculatePrice = function(data) {
+    $.fn.calculatePrice = function (data) {
       totalPrice = 0;
-      $.each(data.products, function(index, product) {
+      $.each(data.products, function (index, product) {
         totalPrice += product.price * product.quantity;
       });
 
@@ -1116,7 +1116,7 @@ function logOnToSystem() {
       return totalPrice;
     };
 
-    $.fn.orderDetails = function(index, orderType) {
+    $.fn.orderDetails = function (index, orderType) {
       $("#refNumber").val("");
 
       if (orderType == 1) {
@@ -1125,14 +1125,14 @@ function logOnToSystem() {
         $("#customer option:selected").removeAttr("selected");
 
         $("#customer option")
-          .filter(function() {
+          .filter(function () {
             return $(this).text() == "Walk in customer";
           })
           .prop("selected", true);
 
         holdOrder = holdOrderList[index]._id;
         cart = [];
-        $.each(holdOrderList[index].items, function(index, product) {
+        $.each(holdOrderList[index].items, function (index, product) {
           item = {
             id: product.id,
             product_name: product.product_name,
@@ -1149,14 +1149,14 @@ function logOnToSystem() {
         $("#customer option:selected").removeAttr("selected");
 
         $("#customer option")
-          .filter(function() {
+          .filter(function () {
             return $(this).text() == customerOrderList[index].customer.name;
           })
           .prop("selected", true);
 
         holdOrder = customerOrderList[index]._id;
         cart = [];
-        $.each(customerOrderList[index].items, function(index, product) {
+        $.each(customerOrderList[index].items, function (index, product) {
           item = {
             id: product.id,
             product_name: product.product_name,
@@ -1173,7 +1173,7 @@ function logOnToSystem() {
       $("#customerModal").modal("hide");
     };
 
-    $.fn.deleteOrder = function(index, type) {
+    $.fn.deleteOrder = function (index, type) {
       switch (type) {
         case 1:
           deleteId = holdOrderList[index]._id;
@@ -1201,13 +1201,13 @@ function logOnToSystem() {
             url: api + "delete",
             type: "POST",
             data: JSON.stringify(data),
-            success: function(data) {
+            success: function (data) {
               $(this).getHoldOrders();
               $(this).getCustomerOrders();
 
               Swal.fire("Đã xóa!", "Bạn đã xóa thành công đơn hàng", "success");
             },
-            error: function(data) {
+            error: function (data) {
               $(".loading").hide();
             },
           });
@@ -1215,8 +1215,8 @@ function logOnToSystem() {
       });
     };
 
-    $.fn.getCustomerOrders = function() {
-      $.get(api + "customer-orders", function(data) {
+    $.fn.getCustomerOrders = function () {
+      $.get(api + "customer-orders", function (data) {
         clearInterval(dotInterval);
         customerOrderList = data;
         customerOrderLocation.empty();
@@ -1224,7 +1224,7 @@ function logOnToSystem() {
       });
     };
 
-    $("#saveCustomer").on("submit", function(e) {
+    $("#saveCustomer").on("submit", function (e) {
       e.preventDefault();
 
       let custData = {
@@ -1240,7 +1240,7 @@ function logOnToSystem() {
         type: "POST",
         data: JSON.stringify(custData),
         processData: false,
-        success: function(data) {
+        success: function (data) {
           $("#newCustomer").modal("hide");
           Swal.fire("Xong!", "Đã thêm khách hàng thành công.", "success");
           $("#customer option:selected").removeAttr("selected");
@@ -1256,7 +1256,7 @@ function logOnToSystem() {
             .val(`{"id": ${custData._id}, "name": ${custData.name}}`)
             .trigger("chosen:updated");
         },
-        error: function(data) {
+        error: function (data) {
           $("#newCustomer").modal("hide");
           Swal.fire(
             "Lỗi",
@@ -1273,7 +1273,7 @@ function logOnToSystem() {
 
     $("#payment").on("input", formatInputPrice);
 
-    $("#confirmPayment").on("click", function() {
+    $("#confirmPayment").on("click", function () {
       if ($("#payment").val() == "") {
         Swal.fire(
           "Không hợp lệ",
@@ -1285,7 +1285,7 @@ function logOnToSystem() {
       }
     });
 
-    $("#transactions").click(function() {
+    $("#transactions").click(function () {
       justGotIn = true;
       loadTransactions();
       loadUserList();
@@ -1296,26 +1296,26 @@ function logOnToSystem() {
       $(this).hide();
     });
 
-    $("#pointofsale").click(function() {
+    $("#pointofsale").click(function () {
       $("#pos_view").show();
       $("#transactions").show();
       $("#transactions_view").hide();
       $(this).hide();
     });
 
-    $("#viewRefOrders").click(function() {
-      setTimeout(function() {
+    $("#viewRefOrders").click(function () {
+      setTimeout(function () {
         $("#holdOrderInput").focus();
       }, 500);
     });
 
-    $("#viewCustomerOrders").click(function() {
-      setTimeout(function() {
+    $("#viewCustomerOrders").click(function () {
+      setTimeout(function () {
         $("#holdCustomerOrderInput").focus();
       }, 500);
     });
 
-    $("#newProductModal").click(function() {
+    $("#newProductModal").click(function () {
       skuFocusTarget = "#newSkuCode";
       $("#saveProduct").get(0).reset();
       $("#bestBefore").val("");
@@ -1328,7 +1328,7 @@ function logOnToSystem() {
       }
     });
 
-    $("#newSkuCode").on("keydown", function(e) {
+    $("#newSkuCode").on("keydown", function (e) {
       if (e.key === "Enter" || e.keyCode === 13) {
         e.preventDefault();
         // Find all focusable elements
@@ -1343,7 +1343,7 @@ function logOnToSystem() {
       }
     });
 
-    $("#hasBestBefore").on("change", function(event) {
+    $("#hasBestBefore").on("change", function (event) {
       if (event.target.checked) {
         $("#quantityEqualize").show();
         $("#quantityContainer").addClass("input-group");
@@ -1358,7 +1358,7 @@ function logOnToSystem() {
 
     $("#quantityDiscountAmt").on("input", formatInputPrice);
 
-    $("#hasQuantityDiscount").on("change", function(event) {
+    $("#hasQuantityDiscount").on("change", function (event) {
       if (event.target.checked) {
         $("#quantityDiscountField").show();
       } else {
@@ -1368,7 +1368,7 @@ function logOnToSystem() {
       }
     });
 
-    $("#saveProduct").on("submit", function(e) {
+    $("#saveProduct").on("submit", function (e) {
       e.preventDefault();
 
       const total_quant = parseInt($("#quantity").val());
@@ -1398,7 +1398,6 @@ function logOnToSystem() {
         return;
       }
 
-
       const price_purchase = $("#price_purchase");
       price_purchase.val(priceToInt(price_purchase.val()));
 
@@ -1413,7 +1412,7 @@ function logOnToSystem() {
 
       $(this).ajaxSubmit({
         contentType: "application/json",
-        success: function(response) {
+        success: function (response) {
           $("#saveProduct").get(0).reset();
           $("#current_img").text("");
 
@@ -1434,13 +1433,13 @@ function logOnToSystem() {
             }
           });
         },
-        error: function(data) {
+        error: function (data) {
           console.log(data);
         },
       });
     });
 
-    $("#saveCategory").submit(function(e) {
+    $("#saveCategory").submit(function (e) {
       e.preventDefault();
 
       if ($("#category_id").val() == "") {
@@ -1455,7 +1454,7 @@ function logOnToSystem() {
         type: method,
         url: api + "categories/category",
         data: JSON.stringify(formData),
-        success: function(data, textStatus, jqXHR) {
+        success: function (data, textStatus, jqXHR) {
           $("#saveCategory").get(0).reset();
           loadCategories();
           loadProducts();
@@ -1474,13 +1473,13 @@ function logOnToSystem() {
             }
           });
         },
-        error: function(data) {
+        error: function (data) {
           console.log(data);
         },
       });
     });
 
-    $.fn.addProductTocartFromSkuCode = function(index) {
+    $.fn.addProductTocartFromSkuCode = function (index) {
       let prod = ambiguousProducts[index];
       $(this).addProductToCart(prod);
       $("#searchBarCode").get(0).reset();
@@ -1489,7 +1488,7 @@ function logOnToSystem() {
       $("#Products").modal("hide");
     };
 
-    $.fn.pickAmbiguousProduct = function() {
+    $.fn.pickAmbiguousProduct = function () {
       let products = ambiguousProducts;
       $("#Products").modal();
       let product_list = "";
@@ -1500,7 +1499,7 @@ function logOnToSystem() {
       products.forEach((product, index) => {
         counter++;
 
-        let category = allCategories.filter(function(category) {
+        let category = allCategories.filter(function (category) {
           return category._id == product.category;
         });
 
@@ -1548,7 +1547,7 @@ function logOnToSystem() {
       }
     };
 
-    $.fn.editProduct = function(index) {
+    $.fn.editProduct = function (index) {
       $("#Products").modal("hide");
 
       for (let i of bestBeforeIdx) {
@@ -1556,7 +1555,7 @@ function logOnToSystem() {
       }
 
       $("#category option")
-        .filter(function() {
+        .filter(function () {
           return $(this).val() == allProducts[index].category;
         })
         .prop("selected", true);
@@ -1627,7 +1626,7 @@ function logOnToSystem() {
       $("#newProduct").modal("show");
     };
 
-    $("#expiresIn").on("change", function(event) {
+    $("#expiresIn").on("change", function (event) {
       const val = parseInt(event.target.value);
       if (val == -1) {
         loadProductList();
@@ -1648,11 +1647,11 @@ function logOnToSystem() {
       }
     });
 
-    $("#userModal").on("hide.bs.modal", function() {
+    $("#userModal").on("hide.bs.modal", function () {
       $(".perms").hide();
     });
 
-    $.fn.editUser = function(index) {
+    $.fn.editUser = function (index) {
       user_index = index;
 
       $("#Users").modal("hide");
@@ -1676,14 +1675,14 @@ function logOnToSystem() {
       $("#userModal").modal("show");
     };
 
-    $.fn.editCategory = function(index) {
+    $.fn.editCategory = function (index) {
       $("#Categories").modal("hide");
       $("#categoryName").val(allCategories[index].name);
       $("#category_id").val(allCategories[index]._id);
       $("#newCategory").modal("show");
     };
 
-    $.fn.deleteProduct = function(id) {
+    $.fn.deleteProduct = function (id) {
       Swal.fire({
         title: "Chắc chưa?",
         text: "Chuẩn bị xóa mặt hàng đó",
@@ -1698,7 +1697,7 @@ function logOnToSystem() {
           $.ajax({
             url: api + "inventory/product/" + id,
             type: "DELETE",
-            success: function(result) {
+            success: function (result) {
               loadProducts();
               Swal.fire("Xóa rồi", "Mặt hàng đã xoá", "success");
             },
@@ -1707,7 +1706,7 @@ function logOnToSystem() {
       });
     };
 
-    $.fn.deleteUser = function(id) {
+    $.fn.deleteUser = function (id) {
       Swal.fire({
         title: "Chắc chưa",
         text: "Chuẩn bị xóa người dùng",
@@ -1722,7 +1721,7 @@ function logOnToSystem() {
           $.ajax({
             url: api + "users/user/" + id,
             type: "DELETE",
-            success: function(result) {
+            success: function (result) {
               loadUserList();
               Swal.fire("Xong", "Đã xóa người dùng", "success");
             },
@@ -1731,7 +1730,7 @@ function logOnToSystem() {
       });
     };
 
-    $.fn.deleteCategory = function(id) {
+    $.fn.deleteCategory = function (id) {
       Swal.fire({
         title: "Chắc chưa",
         text: "Chuẩn bị xóa thể loại",
@@ -1746,7 +1745,7 @@ function logOnToSystem() {
           $.ajax({
             url: api + "categories/category/" + id,
             type: "DELETE",
-            success: function(result) {
+            success: function (result) {
               loadCategories();
               Swal.fire("Xong", "Đã xóa thể loại", "success");
             },
@@ -1755,15 +1754,15 @@ function logOnToSystem() {
       });
     };
 
-    $("#productModal").click(function() {
+    $("#productModal").click(function () {
       loadProductList();
     });
 
-    $("#usersModal").click(function() {
+    $("#usersModal").click(function () {
       loadUserList();
     });
 
-    $("#categoryModal").click(function() {
+    $("#categoryModal").click(function () {
       loadCategoryList();
     });
 
@@ -1773,7 +1772,7 @@ function logOnToSystem() {
       $("#user_list").empty();
       $("#userList").DataTable().destroy();
 
-      $.get(api + "users/all", function(users) {
+      $.get(api + "users/all", function (users) {
         allUsers = [...users];
 
         users.forEach((user, index) => {
@@ -1831,7 +1830,7 @@ function logOnToSystem() {
           return;
         }
 
-        let category = allCategories.filter(function(category) {
+        let category = allCategories.filter(function (category) {
           return category._id == product.category;
         });
 
@@ -1907,7 +1906,7 @@ function logOnToSystem() {
         counter++;
 
         category_list += `<tr>
-     
+
             <td>${category.name.normalize("NFKD").replace(/[\u0300-\u036f]/g, "")}</td>
             <td>${category.name}</td>
             <td><span class="btn-group"><button onClick="$(this).editCategory(${index})" class="btn btn-warning"><i class="fa fa-edit"></i></button><button onClick="$(this).deleteCategory(${category._id})" class="btn btn-danger"><i class="fa fa-trash"></i></button></span></td></tr>`;
@@ -1926,10 +1925,10 @@ function logOnToSystem() {
       }
     }
 
-    $.fn.serializeObject = function() {
+    $.fn.serializeObject = function () {
       var o = {};
       var a = this.serializeArray();
-      $.each(a, function() {
+      $.each(a, function () {
         if (o[this.name]) {
           if (!o[this.name].push) {
             o[this.name] = [o[this.name]];
@@ -1942,7 +1941,7 @@ function logOnToSystem() {
       return o;
     };
 
-    $("#log-out").click(function() {
+    $("#log-out").click(function () {
       Swal.fire({
         title: "Chắc chưa",
         text: "Chuẩn bị đăng xuất",
@@ -1954,7 +1953,7 @@ function logOnToSystem() {
         cancelButtonText: "Hủy",
       }).then((result) => {
         if (result.value) {
-          $.get(api + "users/logout/" + user._id, function(data) {
+          $.get(api + "users/logout/" + user._id, function (data) {
             storage.delete("auth");
             storage.delete("user");
             ipcRenderer.send("app-reload", "");
@@ -1963,14 +1962,14 @@ function logOnToSystem() {
       });
     });
 
-    $("#settings_form").on("submit", function(e) {
+    $("#settings_form").on("submit", function (e) {
       e.preventDefault();
       let formData = $(this).serializeObject();
       let mac_address;
 
       api = "http://" + host + ":" + port + "/api/";
 
-      macaddress.one(function(err, mac) {
+      macaddress.one(function (err, mac) {
         mac_address = mac;
       });
 
@@ -1992,17 +1991,17 @@ function logOnToSystem() {
 
         $(this).ajaxSubmit({
           contentType: "application/json",
-          success: function(response) {
+          success: function (response) {
             ipcRenderer.send("app-reload", "");
           },
-          error: function(data) {
+          error: function (data) {
             console.log(data);
           },
         });
       }
     });
 
-    $("#net_settings_form").on("submit", function(e) {
+    $("#net_settings_form").on("submit", function (e) {
       e.preventDefault();
       let formData = $(this).serializeObject();
 
@@ -2019,7 +2018,7 @@ function logOnToSystem() {
       }
     });
 
-    $("#saveUser").on("submit", function(e) {
+    $("#saveUser").on("submit", function (e) {
       e.preventDefault();
       let formData = $(this).serializeObject();
 
@@ -2029,7 +2028,7 @@ function logOnToSystem() {
           type: "POST",
           data: JSON.stringify(formData),
           processData: false,
-          success: function(data) {
+          success: function (data) {
             if (ownUserEdit) {
               ipcRenderer.send("app-reload", "");
             } else {
@@ -2041,7 +2040,7 @@ function logOnToSystem() {
               Swal.fire("Ok!", "Đã lưu thông tin người dùng mới", "success");
             }
           },
-          error: function(data) {
+          error: function (data) {
             console.error(data);
           },
         });
@@ -2050,14 +2049,14 @@ function logOnToSystem() {
       }
     });
 
-    $("#app").change(function() {
+    $("#app").change(function () {
       if (
         $(this).find("option:selected").text() ==
         "Network Point of Sale Terminal"
       ) {
         $("#net_settings_form").show(500);
         $("#settings_form").hide(500);
-        macaddress.one(function(err, mac) {
+        macaddress.one(function (err, mac) {
           $("#mac").val(mac);
         });
       } else {
@@ -2066,7 +2065,7 @@ function logOnToSystem() {
       }
     });
 
-    $("#cashier").click(function() {
+    $("#cashier").click(function () {
       ownUserEdit = true;
 
       $("#userModal").modal("show");
@@ -2082,7 +2081,7 @@ function logOnToSystem() {
       $("#perm_settings").prop("checked", user.perm_settings);
     });
 
-    $("#add-user").click(function() {
+    $("#add-user").click(function () {
       if (platform.app != "Network Point of Sale Terminal") {
         $(".perms").show();
       }
@@ -2091,7 +2090,7 @@ function logOnToSystem() {
       $("#userModal").modal("show");
     });
 
-    $("#settings").click(function() {
+    $("#settings").click(function () {
       if (platform.app == "Network Point of Sale Terminal") {
         $("#net_settings_form").show(500);
         $("#settings_form").hide(500);
@@ -2099,12 +2098,12 @@ function logOnToSystem() {
         $("#ip").val(platform.ip);
         $("#till").val(platform.till);
 
-        macaddress.one(function(err, mac) {
+        macaddress.one(function (err, mac) {
           $("#mac").val(mac);
         });
 
         $("#app option")
-          .filter(function() {
+          .filter(function () {
             return $(this).text() == platform.app;
           })
           .prop("selected", true);
@@ -2134,7 +2133,7 @@ function logOnToSystem() {
         }
 
         $("#app option")
-          .filter(function() {
+          .filter(function () {
             return $(this).text() == settings.app;
           })
           .prop("selected", true);
@@ -2142,27 +2141,27 @@ function logOnToSystem() {
     });
   });
 
-  $(document).on("keydown", function(e) {
+  $(document).on("keydown", function (e) {
     if (!$(e.target).is("input, textarea")) {
       $(skuFocusTarget).focus();
     }
   });
 
-  $("#rmv_logo").click(function() {
+  $("#rmv_logo").click(function () {
     $("#remove_logo").val("1");
     $("#current_logo").hide(500);
     $(this).hide(500);
     $("#logoname").show(500);
   });
 
-  $("#rmv_img").click(function() {
+  $("#rmv_img").click(function () {
     $("#remove_img").val("1");
     $("#current_img").hide(500);
     $(this).hide(500);
     $("#imagename").show(500);
   });
 
-  $("#print_list").click(function() {
+  $("#print_list").click(function () {
     $("#loading").show();
 
     $("#productList").DataTable().destroy();
@@ -2193,7 +2192,7 @@ function logOnToSystem() {
   });
 }
 
-$.fn.print = function() {
+$.fn.print = function () {
   printJS({ printable: receipt, type: "raw-html" });
 };
 
@@ -2212,7 +2211,7 @@ function loadTransactions() {
   let transaction_list = "";
   let query = `by-date?start=${start_date}&end=${end_date}&user=${by_user}&status=${by_status}&till=${by_till}`;
 
-  $.get(api + query, function(transactions) {
+  $.get(api + query, function (transactions) {
     $("#transaction_list").empty();
     $("#transactionList").DataTable().destroy();
     $("#product_sales").empty();
@@ -2226,8 +2225,10 @@ function loadTransactions() {
 
       trans.items.forEach((item) => {
         sold_items.push(item);
-        const item_cost = item.price_purchase ? item.price_purchase : item.price
-        cost += item.quantity * item_cost
+        const item_cost = item.price_purchase
+          ? item.price_purchase
+          : item.price;
+        cost += item.quantity * item_cost;
       });
 
       if (!tills.includes(trans.till)) {
@@ -2264,13 +2265,25 @@ function loadTransactions() {
       let quantity = 0;
 
       quantity = result[id].reduce((a, b) => a + b.quantity, 0);
-      const item_sales = result[id].reduce((a, b) => a + b.quantity * b.price - (b.hasQuantityDiscount ? Math.floor(b.quantity / b.quantityDiscountQuant) * b.quantityDiscountAmt : 0), 0)
+      const item_sales = result[id].reduce(
+        (a, b) =>
+          a +
+          b.quantity * b.price -
+          (b.hasQuantityDiscount
+            ? Math.floor(b.quantity / b.quantityDiscountQuant) *
+              b.quantityDiscountAmt
+            : 0),
+        0,
+      );
       const item_cost = result[id][0].price_purchase * quantity;
 
-      console.log(result[id])
+      console.log(result[id]);
 
       sold.push({
-        ...result[id][0], quantity: quantity, sales: item_sales, profits: item_sales - item_cost
+        ...result[id][0],
+        quantity: quantity,
+        sales: item_sales,
+        profits: item_sales - item_cost,
       });
     }
 
@@ -2292,7 +2305,9 @@ function loadTransactions() {
     justGotIn = false;
 
     $("#total_sales #counter").text(settings.symbol + formatPrice(sales));
-    $("#total_profits #counter").text(settings.symbol + formatPrice(sales - cost));
+    $("#total_profits #counter").text(
+      settings.symbol + formatPrice(sales - cost),
+    );
     $("#total_transactions #counter").text(transact);
     $("#transaction_list").html(transaction_list);
     $("#transactionList").DataTable({
@@ -2308,7 +2323,7 @@ function loadTransactions() {
         "csv",
         {
           extend: "excel",
-          customize: function(xlsx, btn, dt) {
+          customize: function (xlsx, btn, dt) {
             let sheet = xlsx.xl.worksheets["sheet1.xml"];
             const nrow = dt.page.info().recordsTotal;
             const re = RegExp(`[${settings.symbol},]`, "g");
@@ -2346,12 +2361,12 @@ function loadSoldProducts() {
   let items = 0;
   $("#product_sales").empty();
 
-  console.log(sold)
+  console.log(sold);
 
   sold.forEach((item, index) => {
     items += item.quantity;
 
-    let product = allProducts.filter(function(selected) {
+    let product = allProducts.filter(function (selected) {
       return selected._id == item.id;
     });
 
@@ -2374,7 +2389,7 @@ function userFilter(users) {
   $("#users").append(`<option value="0">All</option>`);
 
   users.forEach((user) => {
-    let u = allUsers.filter(function(usr) {
+    let u = allUsers.filter(function (usr) {
       return usr._id == user;
     });
 
@@ -2392,7 +2407,7 @@ function tillFilter(tills) {
   });
 }
 
-$.fn.viewTransaction = function(index) {
+$.fn.viewTransaction = function (index) {
   transaction_index = index;
 
   let discount = allTransactions[index].discount;
@@ -2460,14 +2475,14 @@ $.fn.viewTransaction = function(index) {
             </tr>`;
   }
 
-  receipt = `<div style="font-size: 10px;">                            
+  receipt = `<div style="font-size: 10px;">
         <p style="text-align: center;">
         ${settings.img == "" ? settings.img : '<img style="max-width: 50px;max-width: 100px;" src ="' + img_path + settings.img + '" /><br>'}
             <span style="font-size: 22px;">${settings.store}</span> <br>
             ${settings.address_one} <br>
             ${settings.address_two} <br>
-            ${settings.contact != "" ? "SĐT: " + settings.contact + "<br>" : ""} 
-            ${settings.tax != "" ? "Mã số thuế: " + settings.tax + "<br>" : ""} 
+            ${settings.contact != "" ? "SĐT: " + settings.contact + "<br>" : ""}
+            ${settings.tax != "" ? "Mã số thuế: " + settings.tax + "<br>" : ""}
     </p>
     <hr>
     <left>
@@ -2490,9 +2505,9 @@ $.fn.viewTransaction = function(index) {
         </tr>
         </thead>
         <tbody>
-        ${items}                
- 
-        <tr>                        
+        ${items}
+
+        <tr>
             <td><b>Tổng</b></td>
             <td>:</td>
             <td><b>${settings.symbol}${formatPrice(allTransactions[index].subtotal)}</b></td>
@@ -2502,9 +2517,9 @@ $.fn.viewTransaction = function(index) {
             <td>:</td>
             <td>${discount > 0 ? settings.symbol + formatPrice(allTransactions[index].discount) : ""}</td>
         </tr>
-        
+
         ${tax_row}
-    
+
         <tr>
             <td><h3>Tổng</h3></td>
             <td><h3>:</h3></td>
@@ -2529,22 +2544,22 @@ $.fn.viewTransaction = function(index) {
   $("#orderModal").modal("show");
 };
 
-$("#status").change(function() {
+$("#status").change(function () {
   by_status = $(this).find("option:selected").val();
   loadTransactions();
 });
 
-$("#tills").change(function() {
+$("#tills").change(function () {
   by_till = $(this).find("option:selected").val();
   loadTransactions();
 });
 
-$("#users").change(function() {
+$("#users").change(function () {
   by_user = $(this).find("option:selected").val();
   loadTransactions();
 });
 
-$("#reportrange").on("apply.daterangepicker", function(ev, picker) {
+$("#reportrange").on("apply.daterangepicker", function (ev, picker) {
   start = picker.startDate.format("DD MMM YYYY hh:mm A");
   end = picker.endDate.format("DD MMM YYYY hh:mm A");
 
@@ -2562,7 +2577,7 @@ function authenticate() {
   );
 }
 
-$("body").on("submit", "#account", function(e) {
+$("body").on("submit", "#account", function (e) {
   e.preventDefault();
   let formData = $(this).serializeObject();
 
@@ -2574,7 +2589,7 @@ $("body").on("submit", "#account", function(e) {
       type: "POST",
       data: JSON.stringify(formData),
       processData: false,
-      success: function(data) {
+      success: function (data) {
         if (data._id) {
           storage.set("auth", { token: data.token });
           storage.set("user", data);
@@ -2583,14 +2598,14 @@ $("body").on("submit", "#account", function(e) {
           Swal.fire("Oops!", auth_error, "warning");
         }
       },
-      error: function(data) {
+      error: function (data) {
         $("#login-btn").notify(data.responseText, "error");
       },
     });
   }
 });
 
-$("#quit").click(function() {
+$("#quit").click(function () {
   Swal.fire({
     title: "Chắc chưa",
     text: "Bạn chuẩn bị đóng ứng dụng",
