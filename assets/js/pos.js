@@ -1317,12 +1317,17 @@ function logOnToSystem() {
 
     $("#newProductModal").click(function () {
       skuFocusTarget = "#newSkuCode";
+      $("#product_id").val("");
+      $("img").val("");
+      $("remove_img").val("0");
       $("#saveProduct").get(0).reset();
       $("#bestBefore").val("");
       $("#quantityEqualize").hide();
       $("#quantityContainer").removeClass("input-group");
       $("#bestBeforeField").hide();
-      $("#current_img").text("");
+      $("#rmv_img").hide();
+      $("#imagename").hide();
+      $("#current_img").empty();
       for (let i of bestBeforeIdx) {
         $(this).removeBestBefore(i);
       }
@@ -1374,28 +1379,29 @@ function logOnToSystem() {
       const total_quant = parseInt($("#quantity").val());
       let so_far = 0;
 
-      if (bestBeforeIdx.size == 0) {
-        $("#bestBeforeTbl").notify("Không được để trống", "error");
-        return;
-      }
-
-      for (let i of bestBeforeIdx) {
-        const quant_element = $(`#bb-${i} .bestBeforeQuant`);
-        if (quant_element.val() == "") {
-          quant_element.val(0);
-        }
-        let cur = parseInt(quant_element.val());
-        console.log(cur);
-        if (cur < 0) {
-          $("#bestBeforeTbl").notify("Số lượng không được âm", "error");
+      if ($("#hasBestBefore").prop("checked")) {
+        if (bestBeforeIdx.size == 0) {
+          $("#bestBeforeTbl").notify("Không được để trống", "error");
           return;
-        }
-        so_far += cur;
-      }
+        } else {
+          for (let i of bestBeforeIdx) {
+            const quant_element = $(`#bb-${i} .bestBeforeQuant`);
+            if (quant_element.val() == "") {
+              quant_element.val(0);
+            }
+            let cur = parseInt(quant_element.val());
+            if (cur < 0) {
+              $("#bestBeforeTbl").notify("Số lượng không được âm", "error");
+              return;
+            }
+            so_far += cur;
+          }
 
-      if (total_quant != so_far) {
-        $("#bestBeforeTbl").notify("Số lượng phải thống nhất!", "error");
-        return;
+          if (total_quant != so_far) {
+            $("#bestBeforeTbl").notify("Số lượng phải thống nhất!", "error");
+            return;
+          }
+        }
       }
 
       const price_purchase = $("#price_purchase");
@@ -1568,6 +1574,7 @@ function logOnToSystem() {
 
       $("#product_id").val(allProducts[index]._id);
       $("#img").val(allProducts[index].img);
+      $("remove_img").val("0");
       $("#hasBestBefore").prop("checked", allProducts[index].hasBestBefore);
 
       if (allProducts[index].hasBestBefore) {

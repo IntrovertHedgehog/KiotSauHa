@@ -31,8 +31,10 @@ Check out the [Offline Invoicing](https://github.com/tngoman/Offline_Invoicing) 
 
 - Clone this project.
 - Open terminal and navigate into the cloned folder.
-- Run "npm install" to install dependencies.
-- Run "npm run electron".
+- Run "yarn install" to install dependencies.
+- Run "yarn run electron ." to run 
+- Run "yarn run nodemon --exec electron ." to nodemon
+- debug:...
 - Run "npm run make" to build installer for windows
 
 ![POS](https://github.com/tngoman/Store-POS/blob/master/screenshots/pos.jpg)
