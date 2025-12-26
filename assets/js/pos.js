@@ -1326,7 +1326,6 @@ function logOnToSystem() {
       $("#quantityContainer").removeClass("input-group");
       $("#bestBeforeField").hide();
       $("#rmv_img").hide();
-      $("#imagename").hide();
       $("#current_img").empty();
       for (let i of bestBeforeIdx) {
         $(this).removeBestBefore(i);
