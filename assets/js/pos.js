@@ -2389,7 +2389,7 @@ function generateA4SummaryHTML(txData) {
           <td style="padding: 4px 8px;">Tạm tính:</td>
           <td style="padding: 4px 8px; text-align: right;">${settings.symbol}${formatPrice(txData.subTotal)}</td>
         </tr>
-        ${txData.discount > 0 ? `<tr><td style="padding: 4px 8px;">Ưu đãi:</td><td style="padding: 4px 8px; text-align: right;">-${settings.symbol}${formatPrice(txData.discount)}</td></tr>` : ''}
+        ${txData.discount > 0 ? `<tr><td style="padding: 4px 8px;">Chiết khấu:</td><td style="padding: 4px 8px; text-align: right;">-${settings.symbol}${formatPrice(txData.discount)}</td></tr>` : ''}
         ${settings.charge_tax ? `<tr><td style="padding: 4px 8px;">Thuế VAT (${settings.percentage}%):</td><td style="padding: 4px 8px; text-align: right;">${settings.symbol}${formatPrice(txData.totalVat)}</td></tr>` : ''}
         <tr style="border-top: 2px solid #333; font-weight: bold; font-size: 15px;">
           <td style="padding: 8px 8px 4px 8px;">Thành tiền:</td>
