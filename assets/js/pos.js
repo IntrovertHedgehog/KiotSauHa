@@ -219,7 +219,6 @@ $(function () {
 });
 
 $.fn.addBestBefore = function () {
-  console.log("adding best before " + bestBeforeNextIdx);
   $("#newBestBefore")
     .parent()
     .parent()
@@ -318,7 +317,6 @@ if (auth == undefined) {
       authorization: auth.token,
     },
     success: function (data) {
-      console.log(data);
       resetAjax();
       logOnToSystem();
     },
@@ -472,6 +470,7 @@ function logOnToSystem() {
     }
 
     function loadCustomers() {
+      $("#customer").empty();
       $.get(api + "customers/all", function (customers) {
         customers.forEach((cust) => {
           let customer = `<option value='${JSON.stringify(cust)}'>${cust.name}</option>`;
@@ -639,7 +638,6 @@ function logOnToSystem() {
       let total = 0;
       let grossTotal;
       $("#total").text(cart.length);
-      console.log(cart);
       $.each(cart, function (index, data) {
         total += data.quantity * data.price;
       });
@@ -1198,8 +1196,11 @@ function logOnToSystem() {
     $("#saveCustomer").on("submit", function (e) {
       e.preventDefault();
 
+      const isNewCustomer = $("#customerId").val() === "";
+      const custId = isNewCustomer ? Math.floor(Date.now() / 1000) : Number($("#customerId").val());
+
       let custData = {
-        id: Math.floor(Date.now() / 1000),
+        _id: custId,
         name: $("#customerName").val(),
         phone: $("#customerPhone").val(),
         email: $("#customerEmail").val(),
@@ -1209,24 +1210,13 @@ function logOnToSystem() {
 
       $.ajax({
         url: api + "customers/customer",
-        type: "POST",
+        type: isNewCustomer ? "POST" : "PUT",
         data: JSON.stringify(custData),
         processData: false,
         success: function (data) {
           $("#newCustomer").modal("hide");
-          Swal.fire("Xong!", "Đã thêm khách hàng thành công.", "success");
-          $("#customer option:selected").removeAttr("selected");
-          $("#customer").append(
-            $("<option>", {
-              text: custData.name,
-              value: JSON.stringify(custData),
-              selected: "selected",
-            }),
-          );
-
-          $("#customer")
-            .val(JSON.stringify(custData))
-            .trigger("chosen:updated");
+          Swal.fire("Xong!", "Đã " + (isNewCustomer ? "thêm" : "cập nhật") + " khách hàng thành công.", "success");
+          loadCustomers();
         },
         error: function (data) {
           $("#newCustomer").modal("hide");
@@ -1413,7 +1403,7 @@ function logOnToSystem() {
           });
         },
         error: function (data) {
-          console.log(data);
+          console.error(data);
         },
       });
     });
@@ -1453,7 +1443,7 @@ function logOnToSystem() {
           });
         },
         error: function (data) {
-          console.log(data);
+          console.error(data);
         },
       });
     });
@@ -1559,7 +1549,6 @@ function logOnToSystem() {
         $("#bestBeforeField").show();
 
         allProducts[index].bestBefore.forEach((bb, idx) => {
-          console.log(bb);
           const dateString = moment(bb).format("DD/MM/YYYY");
           const qty = allProducts[index].bestBeforeQuant[idx];
           const id = $(this).addBestBefore();
@@ -1735,6 +1724,27 @@ function logOnToSystem() {
         }
       });
     };
+
+    $.fn.newCustomer = function () {
+      $("#customerId").val("");
+      $("#customerName").val("");
+      $("#customerPhone").val("");
+      $("#customerEmail").val("");
+      $("#customerAddress").val("");
+      $("#customerTaxCode").val("");
+      $("#newCustomer").modal("show");
+    };
+
+    $.fn.editCustomer = function () {
+      let customer = JSON.parse($("#customer").val());
+      $("#customerId").val(customer._id);
+      $("#customerName").val(customer.name);
+      $("#customerPhone").val(customer.phone);
+      $("#customerEmail").val(customer.email);
+      $("#customerAddress").val(customer.address);
+      $("#customerTaxCode").val(customer.tax_code);
+      $("#newCustomer").modal("show");
+    }
 
     $("#productModal").click(function () {
       loadProductList();
@@ -1977,7 +1987,7 @@ function logOnToSystem() {
             ipcRenderer.send("app-reload", "");
           },
           error: function (data) {
-            console.log(data);
+            console.error(data);
           },
         });
       }
@@ -2503,8 +2513,6 @@ function loadTransactions() {
       );
       const item_cost = result[id][0].price_purchase * quantity;
 
-      console.log(result[id]);
-
       sold.push({
         ...result[id][0],
         quantity: quantity,
@@ -2586,8 +2594,6 @@ function loadSoldProducts() {
   let sold_list = "";
   let items = 0;
   $("#product_sales").empty();
-
-  console.log(sold);
 
   sold.forEach((item, index) => {
     items += item.quantity;

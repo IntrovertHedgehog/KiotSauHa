@@ -19,11 +19,11 @@ let customerDB = new Datastore({
 
 customerDB.ensureIndex({ fieldName: "_id", unique: true });
 
-app.get("/", function(req, res) {
+app.get("/", function (req, res) {
   res.send("Customer API");
 });
 
-app.get("/customer/:customerId", function(req, res) {
+app.get("/customer/:customerId", function (req, res) {
   verify_token(req, res);
   if (!req.params.customerId) {
     res.status(500).send("ID field is required.");
@@ -32,45 +32,59 @@ app.get("/customer/:customerId", function(req, res) {
       {
         _id: req.params.customerId,
       },
-      function(err, customer) {
+      function (err, customer) {
         res.send(customer);
       },
     );
   }
 });
 
-app.get("/all", function(req, res) {
+app.get("/all", function (req, res) {
   verify_token(req, res);
-  customerDB.find({}, function(err, docs) {
-    res.send(docs);
+  customerDB.find({}, function (err, docs) {
+    if (docs.length > 0) {
+      res.send(docs);
+    } else {
+      let defaultCustomer = {
+        _id: Math.floor(Date.now() / 1000),
+        name: "Khách vãng lai",
+        phone: "",
+        email: "",
+        address: "",
+        tax_code: "",
+      };
+      customerDB.insert(defaultCustomer);
+      res.send([defaultCustomer]);
+    }
   });
 });
 
-app.post("/customer", function(req, res) {
+app.post("/customer", function (req, res) {
   verify_token(req, res);
   var newCustomer = req.body;
-  customerDB.insert(newCustomer, function(err, customer) {
+  customerDB.insert(newCustomer, function (err, customer) {
     if (err) res.status(500).send(err);
     else res.sendStatus(200);
   });
 });
 
-app.delete("/customer/:customerId", function(req, res) {
+app.delete("/customer/:customerId", function (req, res) {
   verify_token(req, res);
   customerDB.remove(
     {
       _id: req.params.customerId,
     },
-    function(err, numRemoved) {
+    function (err, numRemoved) {
       if (err) res.status(500).send(err);
       else res.sendStatus(200);
     },
   );
 });
 
-app.put("/customer", function(req, res) {
+app.put("/customer", function (req, res) {
   verify_token(req, res);
   let customerId = req.body._id;
+  console.log(req.body);
 
   customerDB.update(
     {
@@ -78,7 +92,9 @@ app.put("/customer", function(req, res) {
     },
     req.body,
     {},
-    function(err, numReplaced, customer) {
+    function (err, numReplaced, customer) {
+      console.log(numReplaced);
+      console.log(customer);
       if (err) res.status(500).send(err);
       else res.sendStatus(200);
     },

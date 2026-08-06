@@ -1,0 +1,15 @@
+{
+    "_id": 1,
+    "settings": {
+        "app": "Network Point of Sale Server",
+        "store": "Tạp Hóa Sáu Hạ",
+        "address_one": " 124 Nguyễn Văn Cừ",
+        "address_two": "Diên Hồng, Pleiku, Gia Lai",
+        "contact": "0593719542",
+        "tax": "SMT123456",
+        "symbol": "",
+        "percentage": "7",
+        "footer": "day la dieu ma toi mong moi",
+        "img": "1786024512443.jpg"
+    }
+}

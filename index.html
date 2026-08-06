@@ -221,12 +221,13 @@
               <div class="card-box" id="card-box">
                   <div class="col-md-12">
                       <div class="row">
-                          <div class="col-md-10">
+                          <div class="col-md-9">
                               <select name="" id="customer" class="form-control">
                           </select>
                           </div>
-                          <div class="col-md-2">
-                              <button data-toggle="modal" data-target="#newCustomer" class="btn btn-success"><i class="fa fa-plus"></i></button>
+                          <div class="col-md-3">
+                              <button data-toggle="modal" onclick="$(this).newCustomer()" class="btn btn-success"><i class="fa fa-plus"></i></button>
+                              <button data-toggle="modal" onclick="$(this).editCustomer()" class="btn btn-primary"><i class="fa fa-edit"></i></button>
                           </div>
                       </div>
                       <div class="input-group m-t-5">
@@ -512,9 +513,10 @@
               </div>
               <div class="modal-body">
                   <form id="saveCustomer" data-parsley-validate>
+                      <input type="hidden" required="required" name="id" parsley-trigger="change" placeholder="" class="form-control" id="customerId">
                       <div class="form-group">
                           <label for="name">Tên khách hàng*</label>
-                          <input type="text" required="required"  name="name" parsley-trigger="change" placeholder="Phan Bội Châu" class="form-control" id="customerName">
+                          <input type="text" required="required" name="name" parsley-trigger="change" placeholder="Phan Bội Châu" class="form-control" id="customerName">
                       </div>
                       <div class="form-group">
                           <label for="phone">Số điện thoại</label>
@@ -691,7 +693,7 @@
                                 <tr>
                                     <th>searched text</th>
                                     <th>Mã vạch</th>
-                                    <th>Mặt hàng</th>
+                                    <th>Ảnh</th>
                                     <th>Tên</th>
                                     <th>Giá nhập</th>
                                     <th>Giá bán</th>
