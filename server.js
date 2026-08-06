@@ -14,14 +14,11 @@ const env_file = join(dataHome, "KiotSauHa/server/.env");
 
 if (!fs.existsSync(env_file)) {
   fs.mkdirSync(dirname(env_file), { recursive: true });
-  fs.writeFileSync(env_file, `SECRET_TOKEN=${process.env.SECRET_TOKEN}`);
+  const SECRET_TOKEN = crypto.randomBytes(256).toString("hex");
+  fs.writeFileSync(env_file, `SECRET_TOKEN=${SECRET_TOKEN}`);
 }
 
 dotenv.config({ path: env_file });
-
-if (!process.env.SECRET_TOKEN) {
-  process.env.SECRET_TOKEN = crypto.randomBytes(256).toString("hex");
-}
 
 const PORT = process.env.PORT || 8001;
 
@@ -29,7 +26,7 @@ console.log("Server started");
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
-app.all("/*", function(req, res, next) {
+app.all("/*", function (req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS");
   res.header(
@@ -43,7 +40,7 @@ app.all("/*", function(req, res, next) {
   }
 });
 
-app.get("/", function(req, res) {
+app.get("/", function (req, res) {
   res.send("POS Server Online.");
 });
 
