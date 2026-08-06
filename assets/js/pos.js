@@ -15,6 +15,8 @@ let perms = null;
 let deleteId = 0;
 let paymentType = 0;
 let receipt = "";
+let currentTxData = null;
+let printFormat = "receipt";
 let totalVat = 0;
 let subTotal = 0;
 let method = "";
@@ -146,6 +148,8 @@ $.fn.reloadCart = function () {
       id: prod._id,
       product_name: prod.name,
       skuCode: prod.skuCode,
+      unit: prod.unit || "",
+      batch_no: prod.batch_no || "",
       price_purchase: priceToInt(prod.price_purchase),
       price: priceToInt(prod.price),
       hasQuantityDiscount: prod.hasQuantityDiscount,
@@ -304,7 +308,7 @@ auth = storage.get("auth");
 user = storage.get("user");
 
 if (auth == undefined) {
-  $.get(api + "users/check/", function (data) {});
+  $.get(api + "users/check/", function (data) { });
   $("#loading").show();
   authenticate();
 } else {
@@ -321,7 +325,7 @@ if (auth == undefined) {
     error: function (err) {
       // force login if expire
       console.error(err);
-      $.get(api + "users/check/", function (data) {});
+      $.get(api + "users/check/", function (data) { });
       $("#loading").show();
       authenticate();
       $.notify(err.responseText, "error");
@@ -430,12 +434,12 @@ function logOnToSystem() {
           let item_info = `<div class="col-lg-2 box ${item.category}"
                                 onclick="$(this).addToCart(${item._id}, ${item.quantity}, ${item.stock})">
                             <div class="widget-panel widget-style-2 ">
-                            <div hidden class="search-term">${item.name.normalize("NFKD").replace(/[\u0300-\u036f]/g, "")}</div>
+                            <div hidden class="search-term">${item.name.normalize("NFKD").replace(/[\u0300-\u036f]/g, "")} ${(item.unit || "").normalize("NFKD").replace(/[\u0300-\u036f]/g, "")} ${item.batch_no || ""}</div>
                             <div id="image"><img src="${item.img == "" ? "./assets/images/default.jpg" : img_path + item.img}" id="product_img" alt=""></div>
                                         <div class="text-muted m-t-5 text-center">
                                         <div class="name" id="product_name">${item.name}</div>
                                         <span class="skuCode" style="display:none">${item.skuCode}</span>
-                                        <span class="stock">SL </span><span class="count">${item.stock == 1 ? item.quantity : "N/A"}</span></div>
+                                        <span class="stock">SL </span><span class="count">${item.stock == 1 ? item.quantity : "N/A"}${item.unit ? " " + item.unit : ""}</span></div>
                                         <sp class="text-success text-center"><b data-plugin="counterup">${settings.symbol + item.price}</b> </sp>
                             </div>
                         </div>`;
@@ -469,12 +473,8 @@ function logOnToSystem() {
 
     function loadCustomers() {
       $.get(api + "customers/all", function (customers) {
-        $("#customer").html(
-          `<option value="0" selected="selected">Khách lạ</option>`,
-        );
-
         customers.forEach((cust) => {
-          let customer = `<option value='{"id": ${cust._id}, "name": "${cust.name}"}'>${cust.name}</option>`;
+          let customer = `<option value='${JSON.stringify(cust)}'>${cust.name}</option>`;
           $("#customer").append(customer);
         });
 
@@ -517,8 +517,8 @@ function logOnToSystem() {
             Swal.fire(
               "Không tìm thấy",
               "<b>" +
-                $("#skuCode").val() +
-                "</b> không phải là mã vạch hợp lệ!",
+              $("#skuCode").val() +
+              "</b> không phải là mã vạch hợp lệ!",
               "warning",
             );
 
@@ -590,6 +590,8 @@ function logOnToSystem() {
         id: data._id,
         product_name: data.name,
         skuCode: data.skuCode,
+        unit: data.unit || "",
+        batch_no: data.batch_no || "",
         price_purchase: data.price_purchase,
         price: data.price,
         hasQuantityDiscount: data.hasQuantityDiscount,
@@ -667,7 +669,7 @@ function logOnToSystem() {
         $("#cartTable > tbody").append(
           $("<tr>").append(
             $("<td>", { text: index + 1 }).attr("width", "30px"),
-            $("<td>", { text: data.product_name }).attr("width", "200px"),
+            $("<td>", { text: data.product_name + (data.unit ? ` (${data.unit})` : "") }).attr("width", "200px"),
             $("<td>")
               .attr("width", "180px")
               .append(
@@ -702,7 +704,7 @@ function logOnToSystem() {
                 formatPrice(
                   data.hasQuantityDiscount
                     ? Math.floor(data.quantity / data.quantityDiscountQuant) *
-                        data.quantityDiscountAmt
+                    data.quantityDiscountAmt
                     : 0,
                 ),
             }).attr("width", "80px"),
@@ -904,68 +906,34 @@ function logOnToSystem() {
         method = "POST";
       }
 
-      receipt = `<div style="font-size: 10px;">
-        <p style="text-align: center;">
-        ${settings.img == "" ? settings.img : '<img style="max-width: 50px;max-width: 100px;" src ="' + img_path + settings.img + '" /><br>'}
-            <span style="font-size: 22px;">${settings.store}</span> <br>
-            ${settings.address_one} <br>
-            ${settings.address_two} <br>
-            ${settings.contact != "" ? "Số điện thoại: " + settings.contact + "<br>" : ""}
-            ${settings.tax != "" ? "Mã số thuế" + settings.tax + "<br>" : ""}
-        </p>
-        <hr>
-        <left>
-            <p>
-            Hóa đơn số: ${orderNumber} <br>
-            Số tham chiếu: ${refNumber == "" ? orderNumber : refNumber} <br>
-            Tên khách hàng: ${customer == 0 ? "Khách lạ" : customer.name} <br>
-            Thu ngân: ${user.fullname} <br>
-            Ngày, giờ: ${date}<br>
-            </p>
+      let itemsList = [];
+      cart.forEach((item) => {
+        itemsList.push({
+          product_name: item.product_name,
+          unit: item.unit || "",
+          batch_no: item.batch_no || "",
+          quantity: item.quantity,
+          price: item.price,
+        });
+      });
 
-        </left>
-        <hr>
-        <table width="100%">
-            <thead style="text-align: left;">
-            <tr>
-                <th>Mặt hàng</th>
-                <th>SL</th>
-                <th>Giá</th>
-            </tr>
-            </thead>
-            <tbody>
-            ${items}
+      currentTxData = {
+        orderNumber: orderNumber,
+        refNumber: refNumber == "" ? orderNumber : refNumber,
+        customer: customer,
+        userName: user.fullname,
+        date: date,
+        items: itemsList,
+        subTotal: subTotal,
+        discount: discount,
+        totalVat: totalVat,
+        orderTotal: orderTotal,
+        paid: paid,
+        change: change,
+        paymentTypeStr: type,
+      };
 
-            <tr>
-                <td><b>Tổng</b></td>
-                <td>:</td>
-                <td><b>${settings.symbol}${formatPrice(subTotal)}</b></td>
-            </tr>
-            <tr>
-                <td>Ưu đãi</td>
-                <td>:</td>
-                <td>${discount > 0 ? settings.symbol + formatPrice(discount) : ""}</td>
-            </tr>
-
-            ${tax_row}
-
-            <tr>
-                <td><h3>Thành tiền</h3></td>
-                <td><h3>:</h3></td>
-                <td>
-                    <h3>${settings.symbol}${formatPrice(orderTotal)}</h3>
-                </td>
-            </tr>
-            ${payment == 0 ? "" : payment}
-            </tbody>
-            </table>
-            <br>
-            <hr>
-            <br>
-            <p style="text-align: center;">
-             ${settings.footer}
-             </p>
-            </div>`;
+      renderOrderModalContent();
 
       if (status == 3) {
         if (cart.length > 0) {
@@ -1010,8 +978,7 @@ function logOnToSystem() {
         success: function (data) {
           cart = [];
           $("#inputDiscount").val("");
-          $("#viewTransaction").html("");
-          $("#viewTransaction").html(receipt);
+          renderOrderModalContent();
           $("#orderModal").modal("show");
           loadProducts();
           loadCustomers();
@@ -1137,6 +1104,8 @@ function logOnToSystem() {
             id: product.id,
             product_name: product.product_name,
             skuCode: product.skuCode,
+            unit: product.unit || "",
+            batch_no: product.batch_no || "",
             price_purchase: product.price_purchase,
             price: product.price,
             quantity: product.quantity,
@@ -1161,6 +1130,8 @@ function logOnToSystem() {
             id: product.id,
             product_name: product.product_name,
             skuCode: product.skuCode,
+            unit: product.unit || "",
+            batch_no: product.batch_no || "",
             price_purchase: product.price_purchase,
             price: product.price,
             quantity: product.quantity,
@@ -1228,11 +1199,12 @@ function logOnToSystem() {
       e.preventDefault();
 
       let custData = {
-        _id: Math.floor(Date.now() / 1000),
-        name: $("#userName").val(),
-        phone: $("#phoneNumber").val(),
-        email: $("#emailAddress").val(),
-        address: $("#userAddress").val(),
+        id: Math.floor(Date.now() / 1000),
+        name: $("#customerName").val(),
+        phone: $("#customerPhone").val(),
+        email: $("#customerEmail").val(),
+        address: $("#customerAddress").val(),
+        tax_code: $("#customerTaxCode").val(),
       };
 
       $.ajax({
@@ -1247,13 +1219,13 @@ function logOnToSystem() {
           $("#customer").append(
             $("<option>", {
               text: custData.name,
-              value: `{"id": ${custData._id}, "name": ${custData.name}}`,
+              value: JSON.stringify(custData),
               selected: "selected",
             }),
           );
 
           $("#customer")
-            .val(`{"id": ${custData._id}, "name": ${custData.name}}`)
+            .val(JSON.stringify(custData))
             .trigger("chosen:updated");
         },
         error: function (data) {
@@ -1321,6 +1293,8 @@ function logOnToSystem() {
       $("img").val("");
       $("remove_img").val("0");
       $("#saveProduct").get(0).reset();
+      $("#product_unit").val("");
+      $("#product_batch_no").val("");
       $("#bestBefore").val("");
       $("#quantityEqualize").hide();
       $("#quantityContainer").removeClass("input-group");
@@ -1567,6 +1541,8 @@ function logOnToSystem() {
 
       $("#newSkuCode").val(allProducts[index].skuCode);
       $("#productName").val(allProducts[index].name);
+      $("#product_unit").val(allProducts[index].unit || "");
+      $("#product_batch_no").val(allProducts[index].batch_no || "");
       $("#price_purchase").val(allProducts[index].price_purchase);
       $("#product_price").val(allProducts[index].price);
       $("#quantity").val(allProducts[index].quantity);
@@ -1851,7 +1827,7 @@ function logOnToSystem() {
 
         product_list +=
           `<tr>
-            <td>${product.skuCode} ${product.name.normalize("NFKD").replace(/[\u0300-\u036f]/g, "")}</td>
+            <td>${product.skuCode} ${product.name.normalize("NFKD").replace(/[\u0300-\u036f]/g, "")} ${(product.unit || "").normalize("NFKD").replace(/[\u0300-\u036f]/g, "")} ${product.batch_no || ""}</td>
             <td><img id="` +
           product._id +
           `"></td>
@@ -1879,7 +1855,7 @@ function logOnToSystem() {
         });
 
       $("#productList").DataTable({
-        order: [[4, "desc"]],
+        order: [[6, "desc"]],
         autoWidth: false,
         info: true,
         JQueryUI: true,
@@ -1895,7 +1871,7 @@ function logOnToSystem() {
           null,
           null,
           null,
-          { orderData: 8 },
+          { orderData: 9 },
           null,
           null,
         ],
@@ -2198,8 +2174,252 @@ function logOnToSystem() {
   });
 }
 
+function switchPrintFormat(format) {
+  printFormat = format;
+  if (format === "a4") {
+    $("#btnFormatReceipt").removeClass("btn-primary active").addClass("btn-default");
+    $("#btnFormatA4").removeClass("btn-default").addClass("btn-primary active");
+    $("#orderModalDialog").removeClass("modal-sm").addClass("modal-lg");
+  } else {
+    $("#btnFormatA4").removeClass("btn-primary active").addClass("btn-default");
+    $("#btnFormatReceipt").removeClass("btn-default").addClass("btn-primary active");
+    $("#orderModalDialog").removeClass("modal-lg").addClass("modal-sm");
+  }
+  renderOrderModalContent();
+}
+
+$.fn.switchPrintFormat = function (format) {
+  switchPrintFormat(format);
+};
+
+window.switchPrintFormat = switchPrintFormat;
+
+function renderOrderModalContent() {
+  if (!currentTxData) return;
+  if (printFormat === "a4") {
+    receipt = generateA4SummaryHTML(currentTxData);
+  } else {
+    receipt = generateReceiptHTML(currentTxData);
+  }
+  $("#viewTransaction").html(receipt);
+}
+
+function generateReceiptHTML(txData) {
+  let itemsHtml = "";
+  txData.items.forEach((item) => {
+    itemsHtml += `<tr>
+      <td style="word-break: break-word;">${item.product_name}${item.unit ? ' (' + item.unit + ')' : ''}</td>
+      <td style="text-align: center;">${item.quantity}</td>
+      <td style="text-align: right;">${settings.symbol}${formatPrice(item.price)}</td>
+    </tr>`;
+  });
+
+  let paymentHtml = "";
+  if (txData.paid !== "" && txData.paid !== undefined) {
+    paymentHtml = `<tr>
+        <td>Đã trả</td>
+        <td>:</td>
+        <td style="text-align: right;">${settings.symbol + formatPrice(txData.paid)}</td>
+    </tr>
+    <tr>
+        <td>Thối</td>
+        <td>:</td>
+        <td style="text-align: right;">${settings.symbol + formatPrice(txData.change)}</td>
+    </tr>
+    <tr>
+        <td>Phương thức TT</td>
+        <td>:</td>
+        <td style="text-align: right;">${txData.paymentTypeStr}</td>
+    </tr>`;
+  }
+
+  let taxRowHtml = "";
+  if (settings.charge_tax) {
+    taxRowHtml = `<tr>
+        <td>Thuế VAT (${settings.percentage}%)</td>
+        <td>:</td>
+        <td style="text-align: right;">${settings.symbol}${formatPrice(txData.totalVat)}</td>
+    </tr>`;
+  }
+
+  return `<style>
+    @page { margin: 0; size: auto; }
+    html, body { margin: 0; padding: 0; width: 100%; box-sizing: border-box; font-family: monospace, sans-serif; }
+    * { box-sizing: border-box; word-wrap: break-word; overflow-wrap: break-word; }
+    .receipt-container { width: 100%; max-width: 100%; padding: 5px; margin: 0; font-size: 10px; box-sizing: border-box; }
+    table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+    td, th { padding: 2px 0; vertical-align: top; word-break: break-word; }
+  </style>
+  <div class="receipt-container">
+    <p style="text-align: center; margin: 0 0 5px 0;">
+    ${settings.img == "" ? settings.img : '<img style="max-width: 80px;" src ="' + img_path + settings.img + '" /><br>'}
+        <span style="font-size: 16px; font-weight: bold;">${settings.store}</span> <br>
+        ${settings.address_one} <br>
+        ${settings.address_two} <br>
+        ${settings.contact != "" ? "Số điện thoại: " + settings.contact + "<br>" : ""}
+        ${settings.tax != "" ? "Mã số thuế: " + settings.tax + "<br>" : ""}
+    </p>
+    <hr style="border: none; border-top: 1px dashed #000; margin: 5px 0;">
+    <div style="text-align: left; margin-bottom: 5px;">
+        Hóa đơn số: ${txData.orderNumber} <br>
+        Số tham chiếu: ${txData.refNumber} <br>
+        Tên khách hàng: ${txData.customer.name} <br>
+        Thu ngân: ${txData.userName} <br>
+        Ngày, giờ: ${txData.date}<br>
+    </div>
+    <hr style="border: none; border-top: 1px dashed #000; margin: 5px 0;">
+    <table width="100%">
+        <thead style="text-align: left;">
+        <tr>
+            <th style="width: 55%;">Mặt hàng</th>
+            <th style="width: 15%; text-align: center;">SL</th>
+            <th style="width: 30%; text-align: right;">Giá</th>
+        </tr>
+        </thead>
+        <tbody>
+        ${itemsHtml}
+
+        <tr>
+            <td style="font-weight: bold;">Tổng</td>
+            <td>:</td>
+            <td style="font-weight: bold; text-align: right;">${settings.symbol}${formatPrice(txData.subTotal)}</td>
+        </tr>
+        <tr>
+            <td>Ưu đãi</td>
+            <td>:</td>
+            <td style="text-align: right;">${txData.discount > 0 ? settings.symbol + formatPrice(txData.discount) : ""}</td>
+        </tr>
+
+        ${taxRowHtml}
+
+        <tr>
+            <td style="font-weight: bold; font-size: 12px;">Thành tiền</td>
+            <td style="font-weight: bold;">:</td>
+            <td style="font-weight: bold; font-size: 12px; text-align: right;">${settings.symbol}${formatPrice(txData.orderTotal)}</td>
+        </tr>
+        ${paymentHtml}
+        </tbody>
+        </table>
+        <hr style="border: none; border-top: 1px dashed #000; margin: 8px 0;">
+        <p style="text-align: center; margin: 5px 0 0 0;">
+         ${settings.footer}
+        </p>
+    </div>`;
+}
+
+function generateA4SummaryHTML(txData) {
+  let itemsRowsA4 = "";
+  txData.items.forEach((item, idx) => {
+    let itemTotal = item.quantity * item.price;
+    itemsRowsA4 += `
+      <tr style="border-bottom: 1px solid #eee;">
+        <td style="padding: 8px; text-align: center;">${idx + 1}</td>
+        <td style="padding: 8px; text-align: left; word-break: break-word;">${item.product_name}</td>
+        <td style="padding: 8px; text-align: center;">${item.unit}</td>
+        <td style="padding: 8px; text-align: center;">${item.batch_no}</td>
+        <td style="padding: 8px; text-align: center;">${item.quantity}</td>
+        <td style="padding: 8px; text-align: right;">${settings.symbol}${formatPrice(item.price)}</td>
+        <td style="padding: 8px; text-align: right;">${settings.symbol}${formatPrice(itemTotal)}</td>
+      </tr>
+    `;
+  });
+
+  return `
+  <style>
+    @page { size: A4; margin: 10mm; }
+    html, body { margin: 0; padding: 0; width: 100%; box-sizing: border-box; }
+    * { box-sizing: border-box; word-wrap: break-word; overflow-wrap: break-word; }
+    .a4-summary-container { width: 100% !important; max-width: 100% !important; margin: 0 !important; padding: 15px !important; font-family: Arial, sans-serif; background: #fff; color: #333; box-sizing: border-box !important; }
+    table { width: 100% !important; border-collapse: collapse; }
+    td, th { vertical-align: top; word-break: break-word; }
+  </style>
+  <div class="a4-summary-container">
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #333; padding-bottom: 15px; margin-bottom: 20px;">
+      <div>
+        ${settings.img ? `<img style="max-height: 50px; margin-bottom: 5px;" src="${img_path}${settings.img}" /><br>` : ''}
+        <h2 style="margin: 0; text-transform: uppercase; font-size: 20px; font-weight: bold;">${settings.store || "Kiot SauHa"}</h2>
+        <p style="margin: 5px 0 0 0; font-size: 13px;">${settings.address_one || ""} ${settings.address_two || ""}</p>
+        <p style="margin: 2px 0 0 0; font-size: 13px;">${settings.contact ? "SĐT: " + settings.contact : ""} ${settings.tax ? " | MST: " + settings.tax : ""}</p>
+      </div>
+      <div style="text-align: right;">
+        <h3 style="margin: 0; color: #222; font-size: 18px; text-transform: uppercase;">PHIẾU XUẤT KHO BÁN HÀNG</h3>
+        <p style="margin: 5px 0 0 0; font-size: 13px;">Hóa đơn số: <strong>${txData.orderNumber}</strong></p>
+        <p style="margin: 2px 0 0 0; font-size: 13px;">Ngày: ${txData.date}</p>
+      </div>
+    </div>
+
+    <table style="width: 100%; margin-bottom: 20px; font-size: 13px; border-collapse: collapse;">
+      <tr>
+        <td style="padding: 6px 0; width: 50%;"><strong>Khách hàng:</strong> ${txData.customer.name}</td>
+        <td style="padding: 6px 0;"><strong>Số tham chiếu:</strong> ${txData.refNumber}</td>
+      </tr>
+      <tr>
+        <td style="padding: 6px 0; width: 50%;"><strong>Địa chỉ:</strong> ${txData.customer.address}</td>
+        <td style="padding: 6px 0;"><strong>Thu ngân:</strong> ${txData.userName}</td>
+      </tr>
+      <tr>
+        <td style="padding: 6px 0; width: 50%;"><strong>SĐT:</strong> ${txData.customer.phone}</td>
+        <td style="padding: 6px 0;"><strong>Hình thức thanh toán:</strong> ${txData.paymentTypeStr || "Tiền mặt"}</td>
+      </tr>
+      <tr>
+        <td style="padding: 6px 0; width: 50%;"><strong>Mã số thuế:</strong> ${txData.customer.tax_code}</td>
+      </tr>
+    </table>
+
+    <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 13px; table-layout: fixed;">
+      <thead>
+        <tr style="background-color: #f5f5f5; border-top: 1px solid #ccc; border-bottom: 2px solid #ccc;">
+          <th style="padding: 8px; text-align: center; width: 50px;">STT</th>
+          <th style="padding: 8px; text-align: left;">Tên mặt hàng</th>
+          <th style="padding: 8px; text-align: center; width: 60px;">Đơn vị</th>
+          <th style="padding: 8px; text-align: center; width: 50px;">Số lô</th>
+          <th style="padding: 8px; text-align: center; width: 70px;">Số lượng</th>
+          <th style="padding: 8px; text-align: right; width: 120px;">Đơn giá</th>
+          <th style="padding: 8px; text-align: right; width: 130px;">Thành tiền</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${itemsRowsA4}
+      </tbody>
+    </table>
+
+    <div style="display: flex; justify-content: flex-end; margin-bottom: 20px;">
+      <table style="width: 100%; max-width: 320px; font-size: 13px; border-collapse: collapse;">
+        <tr>
+          <td style="padding: 4px 8px;">Tạm tính:</td>
+          <td style="padding: 4px 8px; text-align: right;">${settings.symbol}${formatPrice(txData.subTotal)}</td>
+        </tr>
+        ${txData.discount > 0 ? `<tr><td style="padding: 4px 8px;">Ưu đãi:</td><td style="padding: 4px 8px; text-align: right;">-${settings.symbol}${formatPrice(txData.discount)}</td></tr>` : ''}
+        ${settings.charge_tax ? `<tr><td style="padding: 4px 8px;">Thuế VAT (${settings.percentage}%):</td><td style="padding: 4px 8px; text-align: right;">${settings.symbol}${formatPrice(txData.totalVat)}</td></tr>` : ''}
+        <tr style="border-top: 2px solid #333; font-weight: bold; font-size: 15px;">
+          <td style="padding: 8px 8px 4px 8px;">Thành tiền:</td>
+          <td style="padding: 8px 8px 4px 8px; text-align: right; color: #d9534f;">${settings.symbol}${formatPrice(txData.orderTotal)}</td>
+        </tr>
+        ${txData.paid !== "" && txData.paid !== undefined ? `
+        <tr>
+          <td style="padding: 4px 8px;">Đã trả:</td>
+          <td style="padding: 4px 8px; text-align: right;">${settings.symbol}${formatPrice(txData.paid)}</td>
+        </tr>
+        <tr>
+          <td style="padding: 4px 8px;">Thối:</td>
+          <td style="padding: 4px 8px; text-align: right;">${settings.symbol}${formatPrice(txData.change)}</td>
+        </tr>
+        ` : ''}
+      </table>
+    </div>
+
+    <div style="border-top: 1px solid #eee; padding-top: 15px; text-align: center; font-size: 12px; color: #777;">
+      <p style="margin: 0;">${settings.footer || "Cảm ơn quý khách và hẹn gặp lại!"}</p>
+    </div>
+  </div>`;
+}
+
 $.fn.print = function () {
-  printJS({ printable: receipt, type: "raw-html" });
+  printJS({
+    printable: receipt,
+    type: "raw-html",
+    style: "@page { margin: 0; } body { margin: 0; padding: 0; box-sizing: border-box; } * { box-sizing: border-box; }"
+  });
 };
 
 function loadTransactions() {
@@ -2277,7 +2497,7 @@ function loadTransactions() {
           b.quantity * b.price -
           (b.hasQuantityDiscount
             ? Math.floor(b.quantity / b.quantityDiscountQuant) *
-              b.quantityDiscountAmt
+            b.quantityDiscountAmt
             : 0),
         0,
       );
@@ -2417,32 +2637,13 @@ $.fn.viewTransaction = function (index) {
   transaction_index = index;
 
   let discount = allTransactions[index].discount;
-  let customer =
-    allTransactions[index].customer == 0
-      ? "Khách lạ"
-      : allTransactions[index].customer.username;
+  let customer = allTransactions[index].customer;
   let refNumber =
     allTransactions[index].ref_number != ""
       ? allTransactions[index].ref_number
       : allTransactions[index].order;
   let orderNumber = allTransactions[index].order;
   let type = "";
-  let tax_row = "";
-  let items = "";
-  let products = allTransactions[index].items;
-
-  products.forEach((item) => {
-    items +=
-      "<tr><td>" +
-      item.product_name +
-      "</td><td>" +
-      item.quantity +
-      "</td><td>" +
-      settings.symbol +
-      formatPrice(item.price) +
-      "</td></tr>";
-  });
-
   switch (allTransactions[index].payment_type) {
     case 1:
       type = "Tiền mặt";
@@ -2453,99 +2654,35 @@ $.fn.viewTransaction = function (index) {
       break;
   }
 
-  let payment = 0;
+  let products = allTransactions[index].items;
+  let itemsList = [];
+  products.forEach((item) => {
+    itemsList.push({
+      product_name: item.product_name,
+      unit: item.unit || "",
+      batch_no: item.batch_no || "",
+      quantity: item.quantity,
+      price: item.price,
+    });
+  });
 
-  if (allTransactions[index].paid != "") {
-    payment = `<tr>
-                    <td>Đã trả</td>
-                    <td>:</td>
-                    <td>${settings.symbol + formatPrice(allTransactions[index].paid)}</td>
-                </tr>
-                <tr>
-                    <td>Thối</td>
-                    <td>:</td>
-                    <td>${settings.symbol + formatPrice(Math.abs(allTransactions[index].change))}</td>
-                </tr>
-                <tr>
-                    <td>Phương thức TT</td>
-                    <td>:</td>
-                    <td>${type}</td>
-                </tr>`;
-  }
+  currentTxData = {
+    orderNumber: orderNumber,
+    refNumber: refNumber,
+    customer: customer,
+    userName: allTransactions[index].user,
+    date: moment(allTransactions[index].date).format("DD/MM/YYYY HH:mm:ss"),
+    items: itemsList,
+    subTotal: allTransactions[index].subtotal,
+    discount: discount,
+    totalVat: allTransactions[index].tax,
+    orderTotal: allTransactions[index].total,
+    paid: allTransactions[index].paid,
+    change: Math.abs(allTransactions[index].change),
+    paymentTypeStr: type,
+  };
 
-  if (settings.charge_tax) {
-    tax_row = `<tr>
-                <td>Thuế VAT:(${settings.percentage})% </td>
-                <td>:</td>
-                <td>${settings.symbol}${formatPrice(allTransactions[index].tax)}</td>
-            </tr>`;
-  }
-
-  receipt = `<div style="font-size: 10px;">
-        <p style="text-align: center;">
-        ${settings.img == "" ? settings.img : '<img style="max-width: 50px;max-width: 100px;" src ="' + img_path + settings.img + '" /><br>'}
-            <span style="font-size: 22px;">${settings.store}</span> <br>
-            ${settings.address_one} <br>
-            ${settings.address_two} <br>
-            ${settings.contact != "" ? "SĐT: " + settings.contact + "<br>" : ""}
-            ${settings.tax != "" ? "Mã số thuế: " + settings.tax + "<br>" : ""}
-    </p>
-    <hr>
-    <left>
-        <p>
-        Hóa đơn số: ${orderNumber} <br>
-        Số tham chiếu: ${refNumber} <br>
-        Tên khách hàng: ${allTransactions[index].customer == 0 ? "Khách lạ" : allTransactions[index].customer.name} <br>
-        Thu ngân: ${allTransactions[index].user} <br>
-        Ngày, giờ: ${moment(allTransactions[index].date).format("DD/MM/YYYY HH:mm:ss")}<br>
-        </p>
-
-    </left>
-    <hr>
-    <table width="100%">
-        <thead style="text-align: left;">
-        <tr>
-            <th>Mặt hàng</th>
-            <th>SL</th>
-            <th>Giá</th>
-        </tr>
-        </thead>
-        <tbody>
-        ${items}
-
-        <tr>
-            <td><b>Tổng</b></td>
-            <td>:</td>
-            <td><b>${settings.symbol}${formatPrice(allTransactions[index].subtotal)}</b></td>
-        </tr>
-        <tr>
-            <td>Ưu ��ãi</td>
-            <td>:</td>
-            <td>${discount > 0 ? settings.symbol + formatPrice(allTransactions[index].discount) : ""}</td>
-        </tr>
-
-        ${tax_row}
-
-        <tr>
-            <td><h3>Tổng</h3></td>
-            <td><h3>:</h3></td>
-            <td>
-                <h3>${settings.symbol}${formatPrice(allTransactions[index].total)}</h3>
-            </td>
-        </tr>
-        ${payment == 0 ? "" : payment}
-        </tbody>
-        </table>
-        <br>
-        <hr>
-        <br>
-        <p style="text-align: center;">
-         ${settings.footer}
-         </p>
-        </div>`;
-
-  $("#viewTransaction").html("");
-  $("#viewTransaction").html(receipt);
+  renderOrderModalContent();
 
   $("#orderModal").modal("show");
 };

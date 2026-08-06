@@ -122,6 +122,8 @@ app.post("/product", upload.single("imagename"), function(req, res) {
     quantity: req.body.quantity == "" ? 0 : parseInt(req.body.quantity),
     name: req.body.name,
     skuCode: req.body.skuCode.trim(),
+    unit: req.body.unit ? req.body.unit.trim() : "",
+    batch_no: req.body.batch_no ? req.body.batch_no.trim() : "",
     stock: req.body.stock == "on" ? 0 : 1,
     hasBestBefore: req.body.hasBestBefore == "on" ? 1 : 0,
     bestBefore: bestBeforeDates,

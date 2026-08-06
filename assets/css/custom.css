@@ -71,3 +71,9 @@ input[type="number"] {
   height: 800px;
   overflow: auto;
 }
+
+#viewTransaction td,
+#viewTransaction th {
+  padding-left: 10px;
+  padding-right: 10px;
+}
