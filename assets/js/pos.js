@@ -808,10 +808,6 @@ function logOnToSystem() {
       }
     });
 
-    function printJobComplete() {
-      alert("print job complete");
-    }
-
     $.fn.submitDueOrder = function (status) {
       let items = "";
       let payment = 0;
@@ -839,7 +835,6 @@ function logOnToSystem() {
       let change = priceToInt(
         $("#change").text() == "" ? "0" : $("#change").text(),
       );
-      let refNumber = $("#refNumber").val();
       let orderNumber = holdOrder;
       let type = "";
       let tax_row = "";
@@ -898,7 +893,7 @@ function logOnToSystem() {
         orderNumber = holdOrder;
         method = "PUT";
       } else {
-        orderNumber = Math.floor(Date.now() / 1000);
+        orderNumber = -1;
         method = "POST";
       }
 
@@ -913,8 +908,6 @@ function logOnToSystem() {
       });
 
       currentTxData = {
-        orderNumber: orderNumber,
-        refNumber: refNumber == "" ? orderNumber : refNumber,
         customer: customer,
         userName: user.fullname,
         date: date,
@@ -943,8 +936,6 @@ function logOnToSystem() {
       }
 
       let data = {
-        order: orderNumber,
-        ref_number: refNumber,
         discount: discount,
         customer: customer,
         status: status,
@@ -958,12 +949,15 @@ function logOnToSystem() {
         total: orderTotal,
         paid: paid,
         change: change,
-        _id: orderNumber,
         till: platform.till,
         mac: platform.mac,
         user: user.fullname,
         user_id: user._id,
       };
+
+      if (orderNumber != -1) {
+        data._id = orderNumber;
+      }
 
       $.ajax({
         url: api + "new",
@@ -971,6 +965,7 @@ function logOnToSystem() {
         data: JSON.stringify(data),
         processData: false,
         success: function (data) {
+          currentTxData._id = data._id;
           cart = [];
           $("#inputDiscount").val("");
           renderOrderModalContent();
@@ -991,6 +986,7 @@ function logOnToSystem() {
             "Something went wrong!",
             "Please refresh this page and try again",
           );
+          console.err(data);
         },
       });
 
@@ -2345,7 +2341,7 @@ function generateA4SummaryHTML(txData) {
       </div>
       <div style="text-align: right;">
         <h3 style="margin: 0; color: #222; font-size: 18px; text-transform: uppercase;">PHIẾU XUẤT KHO BÁN HÀNG</h3>
-        <p style="margin: 5px 0 0 0; font-size: 13px;">Hóa đơn số: <strong>${txData.orderNumber}</strong></p>
+        <p style="margin: 5px 0 0 0; font-size: 13px;">Hóa đơn số: <strong>${txData._id}</strong></p>
         <p style="margin: 2px 0 0 0; font-size: 13px;">Ngày: ${txData.date}</p>
       </div>
     </div>
@@ -2353,17 +2349,10 @@ function generateA4SummaryHTML(txData) {
     <table style="width: 100%; margin-bottom: 20px; font-size: 13px; border-collapse: collapse;">
       <tr>
         <td style="padding: 6px 0; width: 50%;"><strong>Khách hàng:</strong> ${txData.customer.name}</td>
-        <td style="padding: 6px 0;"><strong>Số tham chiếu:</strong> ${txData.refNumber}</td>
-      </tr>
-      <tr>
         <td style="padding: 6px 0; width: 50%;"><strong>Địa chỉ:</strong> ${txData.customer.address}</td>
-        <td style="padding: 6px 0;"><strong>Thu ngân:</strong> ${txData.userName}</td>
       </tr>
       <tr>
         <td style="padding: 6px 0; width: 50%;"><strong>SĐT:</strong> ${txData.customer.phone}</td>
-        <td style="padding: 6px 0;"><strong>Hình thức thanh toán:</strong> ${txData.paymentTypeStr || "Tiền mặt"}</td>
-      </tr>
-      <tr>
         <td style="padding: 6px 0; width: 50%;"><strong>Mã số thuế:</strong> ${txData.customer.tax_code}</td>
       </tr>
     </table>
@@ -2648,11 +2637,6 @@ $.fn.viewTransaction = function (index) {
 
   let discount = allTransactions[index].discount;
   let customer = allTransactions[index].customer;
-  let refNumber =
-    allTransactions[index].ref_number != ""
-      ? allTransactions[index].ref_number
-      : allTransactions[index].order;
-  let orderNumber = allTransactions[index].order;
   let type = "";
   switch (allTransactions[index].payment_type) {
     case 1:
@@ -2676,8 +2660,7 @@ $.fn.viewTransaction = function (index) {
   });
 
   currentTxData = {
-    orderNumber: orderNumber,
-    refNumber: refNumber,
+    _id: allTransactions[index]._id,
     customer: customer,
     userName: allTransactions[index].user,
     date: moment(allTransactions[index].date).format("DD/MM/YYYY HH:mm:ss"),

@@ -6,6 +6,7 @@ let Inventory = require("./inventory");
 const { getConfigHome } = require("platform-folders");
 const { join } = require("upath");
 const { verify_token } = require("../server_util");
+const { getNextSequence } = require("./sequence");
 
 const dataHome = getConfigHome();
 app.use(bodyParser.json());
@@ -19,38 +20,38 @@ let transactionsDB = new Datastore({
 
 transactionsDB.ensureIndex({ fieldName: "_id", unique: true });
 
-app.get("/", function(req, res) {
+app.get("/", function (req, res) {
   res.send("Transactions API");
 });
 
-app.get("/all", function(req, res) {
+app.get("/all", function (req, res) {
   verify_token(req, res);
-  transactionsDB.find({}, function(err, docs) {
+  transactionsDB.find({}, function (err, docs) {
     res.send(docs);
   });
 });
 
-app.get("/on-hold", function(req, res) {
+app.get("/on-hold", function (req, res) {
   verify_token(req, res);
   transactionsDB.find(
     { $and: [{ ref_number: { $ne: "" } }, { status: 0 }] },
-    function(err, docs) {
+    function (err, docs) {
       if (docs) res.send(docs);
     },
   );
 });
 
-app.get("/customer-orders", function(req, res) {
+app.get("/customer-orders", function (req, res) {
   verify_token(req, res);
   transactionsDB.find(
     { $and: [{ customer: { $ne: "0" } }, { status: 0 }, { ref_number: "" }] },
-    function(err, docs) {
+    function (err, docs) {
       if (docs) res.send(docs);
     },
   );
 });
 
-app.get("/by-date", function(req, res) {
+app.get("/by-date", function (req, res) {
   verify_token(req, res);
 
   let startDate = new Date(req.query.start);
@@ -64,7 +65,7 @@ app.get("/by-date", function(req, res) {
           { status: parseInt(req.query.status) },
         ],
       },
-      function(err, docs) {
+      function (err, docs) {
         if (docs) res.send(docs);
       },
     );
@@ -79,7 +80,7 @@ app.get("/by-date", function(req, res) {
           { user_id: parseInt(req.query.user) },
         ],
       },
-      function(err, docs) {
+      function (err, docs) {
         if (docs) res.send(docs);
       },
     );
@@ -94,7 +95,7 @@ app.get("/by-date", function(req, res) {
           { till: parseInt(req.query.till) },
         ],
       },
-      function(err, docs) {
+      function (err, docs) {
         if (docs) res.send(docs);
       },
     );
@@ -110,26 +111,30 @@ app.get("/by-date", function(req, res) {
           { user_id: parseInt(req.query.user) },
         ],
       },
-      function(err, docs) {
+      function (err, docs) {
         if (docs) res.send(docs);
       },
     );
   }
 });
 
-app.post("/new", function(req, res) {
+app.post("/new", function (req, res) {
   verify_token(req, res);
   let newTransaction = req.body;
-  transactionsDB.insert(newTransaction, function(err, transaction) {
-    if (err) res.status(500).send(err);
-    else {
-      res.sendStatus(200);
-      Inventory.decrementInventory(newTransaction.items);
-    }
-  });
+  getNextSequence("transaction", (err, numAffected, docs) => {
+    console.log({ err, numAffected, docs });
+    newTransaction._id = docs.value;
+    transactionsDB.insert(newTransaction, function (err, transaction) {
+      if (err) res.status(500).send(err);
+      else {
+        res.status(200).send(newTransaction);
+        Inventory.decrementInventory(newTransaction.items);
+      }
+    });
+  })
 });
 
-app.put("/new", function(req, res) {
+app.put("/new", function (req, res) {
   verify_token(req, res);
   let oderId = req.body._id;
   transactionsDB.update(
@@ -138,30 +143,30 @@ app.put("/new", function(req, res) {
     },
     req.body,
     {},
-    function(err, numReplaced, order) {
+    function (err, numReplaced, order) {
       if (err) res.status(500).send(err);
       else res.sendStatus(200);
     },
   );
 });
 
-app.post("/delete", function(req, res) {
+app.post("/delete", function (req, res) {
   verify_token(req, res);
   let transaction = req.body;
   transactionsDB.remove(
     {
       _id: transaction.orderId,
     },
-    function(err, numRemoved) {
+    function (err, numRemoved) {
       if (err) res.status(500).send(err);
       else res.sendStatus(200);
     },
   );
 });
 
-app.get("/:transactionId", function(req, res) {
+app.get("/:transactionId", function (req, res) {
   verify_token(req, res);
-  transactionsDB.find({ _id: req.params.transactionId }, function(err, doc) {
+  transactionsDB.find({ _id: req.params.transactionId }, function (err, doc) {
     if (doc) res.send(doc[0]);
   });
 });
