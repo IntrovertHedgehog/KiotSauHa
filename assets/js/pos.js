@@ -802,7 +802,8 @@ function logOnToSystem() {
 
     $("#hold").on("click", function () {
       if (cart.length != 0) {
-        $("#dueModal").modal("toggle");
+        $(this).submitDueOrder(0);
+        // $("#dueModal").modal("toggle");
       } else {
         Swal.fire("Ủa!!", "Đâu có gì trong đơn mà cho nợ", "warning");
       }
@@ -828,14 +829,14 @@ function logOnToSystem() {
 
       let discount = priceToInt($("#inputDiscount").val());
       let customer = JSON.parse($("#customer").val());
-      let date = moment(currentTime).format("DD/MM/YYYY HH:mm:ss");
+      let date = moment(currentTime).format("DD/MM/YYYY");
+      let time = moment(currentTime).format("HH:mm:ss");
       let paid = priceToInt(
         $("#payment").val() == "" ? "0" : $("#payment").val(),
       );
       let change = priceToInt(
         $("#change").text() == "" ? "0" : $("#change").text(),
       );
-      let orderNumber = holdOrder;
       let type = "";
       let tax_row = "";
 
@@ -875,18 +876,6 @@ function logOnToSystem() {
                 </tr>`;
       }
 
-      if (status == 0) {
-        if ($("#customer").val() == 0 && $("#refNumber").val() == "") {
-          Swal.fire(
-            "Thiếu số tham chiếu",
-            "Bạn cần nhập số tham chiếu hoặc tên khách hàng",
-            "warning",
-          );
-
-          return;
-        }
-      }
-
       $(".loading").show();
 
       if (holdOrder != 0) {
@@ -911,6 +900,7 @@ function logOnToSystem() {
         customer: customer,
         userName: user.fullname,
         date: date,
+        time: time,
         items: itemsList,
         subTotal: subTotal,
         discount: discount,
@@ -922,18 +912,6 @@ function logOnToSystem() {
       };
 
       renderOrderModalContent();
-
-      if (status == 3) {
-        if (cart.length > 0) {
-          printJS({ printable: receipt, type: "raw-html" });
-
-          $(".loading").hide();
-          return;
-        } else {
-          $(".loading").hide();
-          return;
-        }
-      }
 
       let data = {
         discount: discount,
@@ -978,6 +956,7 @@ function logOnToSystem() {
           $(this).getHoldOrders();
           $(this).getCustomerOrders();
           $(this).renderTable(cart);
+          holdOrder = 0;
         },
         error: function (data) {
           $(".loading").hide();
@@ -1023,11 +1002,11 @@ function logOnToSystem() {
               $("<div>", { class: "card-box order-box" }).append(
                 $("<p>").append(
                   $("<b>", { text: "Mã đối chiếu :" }),
-                  $("<span>", { text: order.ref_number, class: "ref_number" }),
+                  $("<span>", { text: order._id, class: "ref_number" }),
                   $("<br>"),
                   $("<b>", { text: "Giá trị :" }),
                   $("<span>", {
-                    text: order.total,
+                    text: settings.symbol || "" + formatPrice(order.total),
                     class: "label label-info",
                     style: "font-size:14px;",
                   }),
@@ -1078,7 +1057,7 @@ function logOnToSystem() {
       $("#refNumber").val("");
 
       if (orderType == 1) {
-        $("#refNumber").val(holdOrderList[index].ref_number);
+        $("#refNumber").val(holdOrderList[index]._id);
 
         $("#customer option:selected").removeAttr("selected");
 
@@ -2243,11 +2222,8 @@ function generateReceiptHTML(txData) {
 
   return `<style>
     @page { margin: 0; size: auto; }
-    html, body { margin: 0; padding: 0; width: 100%; box-sizing: border-box; font-family: monospace, sans-serif; }
-    * { box-sizing: border-box; word-wrap: break-word; overflow-wrap: break-word; }
-    .receipt-container { width: 100%; max-width: 100%; padding: 5px; margin: 0; font-size: 10px; box-sizing: border-box; }
-    table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-    td, th { padding: 2px 0; vertical-align: top; word-break: break-word; }
+    .receipt-container { width: 100%; max-width: 100%; padding: 5px; margin: 0; font-size: 10px; box-sizing: border-box; font-family: monospace, sans-serif;}
+    .receipt-container td, .receipt-container th { padding: 2px 0; vertical-align: top; word-break: break-word; }
   </style>
   <div class="receipt-container">
     <p style="text-align: center; margin: 0 0 5px 0;">
@@ -2260,14 +2236,14 @@ function generateReceiptHTML(txData) {
     </p>
     <hr style="border: none; border-top: 1px dashed #000; margin: 5px 0;">
     <div style="text-align: left; margin-bottom: 5px;">
-        Hóa đơn số: ${txData.orderNumber} <br>
-        Số tham chiếu: ${txData.refNumber} <br>
+        Hóa đơn số: ${txData._id} <br>
         Tên khách hàng: ${txData.customer.name} <br>
         Thu ngân: ${txData.userName} <br>
-        Ngày, giờ: ${txData.date}<br>
+        Ngày: ${txData.date}<br>
+        Giờ: ${txData.time}<br>
     </div>
     <hr style="border: none; border-top: 1px dashed #000; margin: 5px 0;">
-    <table width="100%">
+    <table width="100%" style="border-collapse: collapse; table-layout: fixed;">
         <thead style="text-align: left;">
         <tr>
             <th style="width: 55%;">Mặt hàng</th>
@@ -2325,11 +2301,9 @@ function generateA4SummaryHTML(txData) {
   return `
   <style>
     @page { size: A4; margin: 10mm; }
-    html, body { margin: 0; padding: 0; width: 100%; box-sizing: border-box; }
-    * { box-sizing: border-box; word-wrap: break-word; overflow-wrap: break-word; }
-    .a4-summary-container { width: 100% !important; max-width: 100% !important; margin: 0 !important; padding: 15px !important; font-family: Arial, sans-serif; background: #fff; color: #333; box-sizing: border-box !important; }
-    table { width: 100% !important; border-collapse: collapse; }
-    td, th { vertical-align: top; word-break: break-word; }
+    .a4-summary-container { width: 100% !important; max-width: 100% !important; margin: 0; padding: 0; font-family: Arial, sans-serif; background: #fff; color: #333; box-sizing: border-box !important; word-wrap: break-word; overflow-wrap: break-word;}
+    .a4-summary-container table { width: 100% !important; border-collapse: collapse; }
+    .a4-summary-container td, .a4-summary-container th { vertical-align: top; word-break: break-word; }
   </style>
   <div class="a4-summary-container">
     <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #333; padding-bottom: 15px; margin-bottom: 20px;">
@@ -2398,24 +2372,18 @@ function generateA4SummaryHTML(txData) {
       </table>
     </div>
 
-    <table id="a4_receipt_footer">
+    <table style="font-size: 13px; table-layout: fixed;">
       <tr>
-        <th>Người lập biểu</th>
-        <th>Thủ kho</th>
-        <th>Người giao hàng</th>
-        <th>Đã thanh toán đủ tiền</th>
+        <th style="text-align: center;">Người lập biểu</th>
+        <th style="text-align: center;">Thủ kho</th>
+        <th style="text-align: center;">Người giao hàng</th>
+        <th style="text-align: center;">Đã thanh toán đủ tiền</th>
       </tr>
       <tr>
-        <td><i>(Ký, họ tên)</i></td>
-        <td><i>(Ký, họ tên)</i></td>
-        <td><i>(Ký, họ tên)</i></td>
-        <td><i>(Ký, họ tên)</i></td>
-      </tr>
-      <tr>
-        <td><br><br></td>
-        <td><br><br></td>
-        <td><br><br></td>
-        <td><br><br></td>
+        <td style="text-align: center;"><i>(Ký, họ tên)</i></td>
+        <td style="text-align: center;"><i>(Ký, họ tên)</i></td>
+        <td style="text-align: center;"><i>(Ký, họ tên)</i></td>
+        <td style="text-align: center;"><i>(Ký, họ tên)</i></td>
       </tr>
     </table>
 
@@ -2475,8 +2443,8 @@ function loadTransactions() {
 
       counter++;
       transaction_list += `<tr>
-                                <td>${trans.order}</td>
-                                <td class="nobr">${moment(trans.date).format("DD/MM/YYYY HH:mm:ss")}</td>
+                                <td>${trans._id}</td>
+                                <td class="nobr">${moment(trans.date).format("DD/MM/YYYY HH:mm")}</td>
                                 <td>${settings.symbol + formatPrice(trans.total)}</td>
                                 <td>${trans.paid == 0 ? '<button class="btn btn-dark"><i class="fa fa-search-plus"></i></button>' : '<button onClick="$(this).viewTransaction(' + index + ')" class="btn btn-info"><i class="fa fa-search-plus"></i></button></td>'}</tr>
                     `;
@@ -2663,7 +2631,8 @@ $.fn.viewTransaction = function (index) {
     _id: allTransactions[index]._id,
     customer: customer,
     userName: allTransactions[index].user,
-    date: moment(allTransactions[index].date).format("DD/MM/YYYY HH:mm:ss"),
+    date: moment(allTransactions[index].date).format("DD/MM/YYYY"),
+    time: moment(allTransactions[index].date).format("HH:mm:ss"),
     items: itemsList,
     subTotal: allTransactions[index].subtotal,
     discount: discount,

@@ -34,17 +34,19 @@ app.get("/all", function (req, res) {
 app.get("/on-hold", function (req, res) {
   verify_token(req, res);
   transactionsDB.find(
-    { $and: [{ ref_number: { $ne: "" } }, { status: 0 }] },
+    // { $and: [{ ref_number: { $ne: "" } }, { status: 0 }] },
+    { status: 0 },
     function (err, docs) {
       if (docs) res.send(docs);
     },
   );
 });
 
+// TODO: not sure what this does - nonfunc
 app.get("/customer-orders", function (req, res) {
   verify_token(req, res);
   transactionsDB.find(
-    { $and: [{ customer: { $ne: "0" } }, { status: 0 }, { ref_number: "" }] },
+    // { $and: [{ customer: { $ne: "0" } }, { status: 0 }] },
     function (err, docs) {
       if (docs) res.send(docs);
     },
@@ -142,10 +144,12 @@ app.put("/new", function (req, res) {
       _id: oderId,
     },
     req.body,
-    {},
+    {
+      returnUpdatedDocs: true
+    },
     function (err, numReplaced, order) {
       if (err) res.status(500).send(err);
-      else res.sendStatus(200);
+      else res.status(200).send(order);
     },
   );
 });

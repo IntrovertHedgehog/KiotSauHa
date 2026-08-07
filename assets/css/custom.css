@@ -78,11 +78,6 @@ input[type="number"] {
   padding-right: 10px;
 }
 
-#a4_receipt_footer th,
-#a4_receipt_footer td {
-  text-align: center;
-}
-
 .transactionList,
 .productsSold {
   display: block;
