@@ -603,6 +603,7 @@ function logOnToSystem() {
         cart.push(item);
         $(this).renderTable(cart);
       }
+      $(this).calculateChange();
     };
 
     $.fn.calculateDiscount = function () {
@@ -2288,12 +2289,12 @@ function generateA4SummaryHTML(txData) {
     let itemTotal = item.quantity * item.price;
     itemsRowsA4 += `
       <tr style="border-bottom: 1px solid #eee;">
-        <td style="padding: 8px; text-align: center;">${idx + 1}</td>
-        <td style="padding: 8px; text-align: left; word-break: break-word;">${item.product_name}</td>
-        <td style="padding: 8px; text-align: center;">${item.unit}</td>
-        <td style="padding: 8px; text-align: center;">${item.quantity}</td>
-        <td style="padding: 8px; text-align: right;">${settings.symbol}${formatPrice(item.price)}</td>
-        <td style="padding: 8px; text-align: right;">${settings.symbol}${formatPrice(itemTotal)}</td>
+        <td style="padding: 8px; text-align: center; border-left: 1px solid ">${idx + 1}</td>
+        <td style="padding: 8px; text-align: left; word-break: break-word; border-left: 1px solid ">${item.product_name}</td>
+        <td style="padding: 8px; text-align: center; border-left: 1px solid ">${item.unit}</td>
+        <td style="padding: 8px; text-align: center; border-left: 1px solid ">${item.quantity}</td>
+        <td style="padding: 8px; text-align: right; border-left: 1px solid ">${settings.symbol || ""}${formatPrice(item.price)}</td>
+        <td style="padding: 8px; text-align: right; border-left: 1px solid; border-right: 1px solid ">${settings.symbol || ""}${formatPrice(itemTotal)}</td>
       </tr>
     `;
   });
@@ -2334,12 +2335,12 @@ function generateA4SummaryHTML(txData) {
     <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 13px; table-layout: fixed;">
       <thead>
         <tr style="background-color: #f5f5f5; border-top: 1px solid #ccc; border-bottom: 2px solid #ccc;">
-          <th style="padding: 8px; text-align: center; width: 50px;">STT</th>
-          <th style="padding: 8px; text-align: left;">Tên mặt hàng</th>
-          <th style="padding: 8px; text-align: center; width: 60px;">Đơn vị</th>
-          <th style="padding: 8px; text-align: center; width: 70px;">Số lượng</th>
-          <th style="padding: 8px; text-align: right; width: 120px;">Đơn giá</th>
-          <th style="padding: 8px; text-align: right; width: 130px;">Thành tiền</th>
+          <th style="padding: 8px; text-align: center; border-left: 1px solid; width: 50px;">STT</th>
+          <th style="padding: 8px; text-align: left; border-left: 1px solid;">Tên mặt hàng</th>
+          <th style="padding: 8px; text-align: center; border-left: 1px solid; width: 60px;">Đơn vị</th>
+          <th style="padding: 8px; text-align: center; border-left: 1px solid; width: 70px;">Số lượng</th>
+          <th style="padding: 8px; text-align: right; border-left: 1px solid; width: 120px;">Đơn giá</th>
+          <th style="padding: 8px; text-align: right; border-left: 1px solid; border-right: 1px solid; width: 130px;">Thành tiền</th>
         </tr>
       </thead>
       <tbody>
