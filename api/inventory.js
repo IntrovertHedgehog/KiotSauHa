@@ -15,7 +15,7 @@ const dataHome = getConfigHome();
 
 const storage = multer.diskStorage({
   destination: join(dataHome, "/KiotSauHa/uploads"),
-  filename: function(req, file, callback) {
+  filename: function (req, file, callback) {
     callback(null, Date.now() + ".jpg"); //
   },
 });
@@ -33,11 +33,11 @@ let inventoryDB = new Datastore({
 
 inventoryDB.ensureIndex({ fieldName: "_id", unique: true });
 
-app.get("/", function(req, res) {
+app.get("/", function (req, res) {
   res.send("Inventory API");
 });
 
-app.get("/product/:productId", function(req, res) {
+app.get("/product/:productId", function (req, res) {
   verify_token(req, res);
   if (!req.params.productId) {
     res.status(500).send("ID field is required.");
@@ -46,21 +46,21 @@ app.get("/product/:productId", function(req, res) {
       {
         _id: parseInt(req.params.productId),
       },
-      function(err, product) {
+      function (err, product) {
         res.send(product);
       },
     );
   }
 });
 
-app.get("/products", function(req, res) {
+app.get("/products", function (req, res) {
   verify_token(req, res);
-  inventoryDB.find({}, function(err, docs) {
+  inventoryDB.find({}, function (err, docs) {
     res.send(docs);
   });
 });
 
-app.post("/product", upload.single("imagename"), function(req, res) {
+app.post("/product", upload.single("imagename"), function (req, res) {
   verify_token(req, res);
 
   let image = "";
@@ -123,7 +123,6 @@ app.post("/product", upload.single("imagename"), function(req, res) {
     name: req.body.name,
     skuCode: req.body.skuCode.trim(),
     unit: req.body.unit ? req.body.unit.trim() : "",
-    batch_no: req.body.batch_no ? req.body.batch_no.trim() : "",
     stock: req.body.stock == "on" ? 0 : 1,
     hasBestBefore: req.body.hasBestBefore == "on" ? 1 : 0,
     bestBefore: bestBeforeDates,
@@ -145,7 +144,7 @@ app.post("/product", upload.single("imagename"), function(req, res) {
 
   if (req.body.id == "") {
     Product._id = Math.floor(Date.now() / 1000);
-    inventoryDB.insert(Product, function(err, product) {
+    inventoryDB.insert(Product, function (err, product) {
       if (err) res.status(500).send(err);
       else res.send(product);
     });
@@ -156,7 +155,7 @@ app.post("/product", upload.single("imagename"), function(req, res) {
       },
       Product,
       {},
-      function(err, numReplaced, product) {
+      function (err, numReplaced, product) {
         if (err) res.status(500).send(err);
         else res.sendStatus(200);
       },
@@ -164,39 +163,39 @@ app.post("/product", upload.single("imagename"), function(req, res) {
   }
 });
 
-app.delete("/product/:productId", function(req, res) {
+app.delete("/product/:productId", function (req, res) {
   verify_token(req, res);
   inventoryDB.remove(
     {
       _id: parseInt(req.params.productId),
     },
-    function(err, numRemoved) {
+    function (err, numRemoved) {
       if (err) res.status(500).send(err);
       else res.sendStatus(200);
     },
   );
 });
 
-app.post("/product/sku", function(req, res) {
+app.post("/product/sku", function (req, res) {
   verify_token(req, res);
   var request = req.body;
   inventoryDB.find(
     {
       skuCode: request.skuCode.trim(),
     },
-    function(err, product) {
+    function (err, product) {
       res.send(product);
     },
   );
 });
 
-app.decrementInventory = function(products) {
-  async.eachSeries(products, function(transactionProduct, callback) {
+app.decrementInventory = function (products) {
+  async.eachSeries(products, function (transactionProduct, callback) {
     inventoryDB.findOne(
       {
         _id: parseInt(transactionProduct.id),
       },
-      function(err, product) {
+      function (err, product) {
         if (!product || !product.quantity) {
           callback();
         } else {

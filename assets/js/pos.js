@@ -149,7 +149,6 @@ $.fn.reloadCart = function () {
       product_name: prod.name,
       skuCode: prod.skuCode,
       unit: prod.unit || "",
-      batch_no: prod.batch_no || "",
       price_purchase: priceToInt(prod.price_purchase),
       price: priceToInt(prod.price),
       hasQuantityDiscount: prod.hasQuantityDiscount,
@@ -432,7 +431,7 @@ function logOnToSystem() {
           let item_info = `<div class="col-lg-2 box ${item.category}"
                                 onclick="$(this).addToCart(${item._id}, ${item.quantity}, ${item.stock})">
                             <div class="widget-panel widget-style-2 ">
-                            <div hidden class="search-term">${item.name.normalize("NFKD").replace(/[\u0300-\u036f]/g, "")} ${(item.unit || "").normalize("NFKD").replace(/[\u0300-\u036f]/g, "")} ${item.batch_no || ""}</div>
+                            <div hidden class="search-term">${item.name.normalize("NFKD").replace(/[\u0300-\u036f]/g, "")} ${(item.unit || "").normalize("NFKD").replace(/[\u0300-\u036f]/g, "")}</div>
                             <div id="image"><img src="${item.img == "" ? "./assets/images/default.jpg" : img_path + item.img}" id="product_img" alt=""></div>
                                         <div class="text-muted m-t-5 text-center">
                                         <div class="name" id="product_name">${item.name}</div>
@@ -590,7 +589,6 @@ function logOnToSystem() {
         product_name: data.name,
         skuCode: data.skuCode,
         unit: data.unit || "",
-        batch_no: data.batch_no || "",
         price_purchase: data.price_purchase,
         price: data.price,
         hasQuantityDiscount: data.hasQuantityDiscount,
@@ -909,7 +907,6 @@ function logOnToSystem() {
         itemsList.push({
           product_name: item.product_name,
           unit: item.unit || "",
-          batch_no: item.batch_no || "",
           quantity: item.quantity,
           price: item.price,
         });
@@ -1103,7 +1100,6 @@ function logOnToSystem() {
             product_name: product.product_name,
             skuCode: product.skuCode,
             unit: product.unit || "",
-            batch_no: product.batch_no || "",
             price_purchase: product.price_purchase,
             price: product.price,
             quantity: product.quantity,
@@ -1129,7 +1125,6 @@ function logOnToSystem() {
             product_name: product.product_name,
             skuCode: product.skuCode,
             unit: product.unit || "",
-            batch_no: product.batch_no || "",
             price_purchase: product.price_purchase,
             price: product.price,
             quantity: product.quantity,
@@ -1284,7 +1279,6 @@ function logOnToSystem() {
       $("remove_img").val("0");
       $("#saveProduct").get(0).reset();
       $("#product_unit").val("");
-      $("#product_batch_no").val("");
       $("#bestBefore").val("");
       $("#quantityEqualize").hide();
       $("#quantityContainer").removeClass("input-group");
@@ -1532,7 +1526,6 @@ function logOnToSystem() {
       $("#newSkuCode").val(allProducts[index].skuCode);
       $("#productName").val(allProducts[index].name);
       $("#product_unit").val(allProducts[index].unit || "");
-      $("#product_batch_no").val(allProducts[index].batch_no || "");
       $("#price_purchase").val(allProducts[index].price_purchase);
       $("#product_price").val(allProducts[index].price);
       $("#quantity").val(allProducts[index].quantity);
@@ -1837,7 +1830,7 @@ function logOnToSystem() {
 
         product_list +=
           `<tr>
-            <td>${product.skuCode} ${product.name.normalize("NFKD").replace(/[\u0300-\u036f]/g, "")} ${(product.unit || "").normalize("NFKD").replace(/[\u0300-\u036f]/g, "")} ${product.batch_no || ""}</td>
+            <td>${product.skuCode} ${product.name.normalize("NFKD").replace(/[\u0300-\u036f]/g, "")} ${(product.unit || "").normalize("NFKD").replace(/[\u0300-\u036f]/g, "")}$</td>
             <td><img id="` +
           product._id +
           `"></td>
@@ -2326,7 +2319,6 @@ function generateA4SummaryHTML(txData) {
         <td style="padding: 8px; text-align: center;">${idx + 1}</td>
         <td style="padding: 8px; text-align: left; word-break: break-word;">${item.product_name}</td>
         <td style="padding: 8px; text-align: center;">${item.unit}</td>
-        <td style="padding: 8px; text-align: center;">${item.batch_no}</td>
         <td style="padding: 8px; text-align: center;">${item.quantity}</td>
         <td style="padding: 8px; text-align: right;">${settings.symbol}${formatPrice(item.price)}</td>
         <td style="padding: 8px; text-align: right;">${settings.symbol}${formatPrice(itemTotal)}</td>
@@ -2382,7 +2374,6 @@ function generateA4SummaryHTML(txData) {
           <th style="padding: 8px; text-align: center; width: 50px;">STT</th>
           <th style="padding: 8px; text-align: left;">Tên mặt hàng</th>
           <th style="padding: 8px; text-align: center; width: 60px;">Đơn vị</th>
-          <th style="padding: 8px; text-align: center; width: 50px;">Số lô</th>
           <th style="padding: 8px; text-align: center; width: 70px;">Số lượng</th>
           <th style="padding: 8px; text-align: right; width: 120px;">Đơn giá</th>
           <th style="padding: 8px; text-align: right; width: 130px;">Thành tiền</th>
@@ -2418,9 +2409,27 @@ function generateA4SummaryHTML(txData) {
       </table>
     </div>
 
-    <div style="border-top: 1px solid #eee; padding-top: 15px; text-align: center; font-size: 12px; color: #777;">
-      <p style="margin: 0;">${settings.footer || "Cảm ơn quý khách và hẹn gặp lại!"}</p>
-    </div>
+    <table id="a4_receipt_footer">
+      <tr>
+        <th>Người lập biểu</th>
+        <th>Thủ kho</th>
+        <th>Người giao hàng</th>
+        <th>Đã thanh toán đủ tiền</th>
+      </tr>
+      <tr>
+        <td><i>(Ký, họ tên)</i></td>
+        <td><i>(Ký, họ tên)</i></td>
+        <td><i>(Ký, họ tên)</i></td>
+        <td><i>(Ký, họ tên)</i></td>
+      </tr>
+      <tr>
+        <td><br><br></td>
+        <td><br><br></td>
+        <td><br><br></td>
+        <td><br><br></td>
+      </tr>
+    </table>
+
   </div>`;
 }
 
@@ -2480,11 +2489,6 @@ function loadTransactions() {
                                 <td>${trans.order}</td>
                                 <td class="nobr">${moment(trans.date).format("DD/MM/YYYY HH:mm:ss")}</td>
                                 <td>${settings.symbol + formatPrice(trans.total)}</td>
-                                <td>${settings.symbol + formatPrice(trans.paid)}</td>
-                                <td>${settings.symbol + formatPrice(Math.abs(trans.change))}</td>
-                                <td>${trans.paid == 0 ? "" : trans.payment_type == 1 ? "Tiền mặt" : "Chuyển khoản"}</td>
-                                <td>${trans.till}</td>
-                                <td>${trans.user}</td>
                                 <td>${trans.paid == 0 ? '<button class="btn btn-dark"><i class="fa fa-search-plus"></i></button>' : '<button onClick="$(this).viewTransaction(' + index + ')" class="btn btn-info"><i class="fa fa-search-plus"></i></button></td>'}</tr>
                     `;
     });
@@ -2666,7 +2670,6 @@ $.fn.viewTransaction = function (index) {
     itemsList.push({
       product_name: item.product_name,
       unit: item.unit || "",
-      batch_no: item.batch_no || "",
       quantity: item.quantity,
       price: item.price,
     });
